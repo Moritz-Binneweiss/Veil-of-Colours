@@ -1,4 +1,4 @@
-# **Hue**
+# **Veil of Colours**
 
 ## **Mitwirkende**
 
@@ -8,7 +8,7 @@
 
 ### **Figma Board**
 
-- https://www.figma.com/board/kBoRnHPDNGJm4fzHZrUeEu/Hue?node-id=0-1&t=iILywtfm8KVIP3qu-1
+- https://www.figma.com/board/kBoRnHPDNGJm4fzHZrUeEu/Veil-of-Colours?node-id=0-1&t=oa8m78GmibciiSQd-1
 
 ## **Features**
 
