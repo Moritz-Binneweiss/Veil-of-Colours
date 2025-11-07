@@ -84,50 +84,26 @@ namespace VeilOfColours.Puzzle
 
         private void Update()
         {
-            // Debug: Show when player is nearby
-            if (isPlayerNearby)
+            if (
+                isPlayerNearby
+                && Keyboard.current != null
+                && Keyboard.current.eKey.wasPressedThisFrame
+            )
             {
-                // Check if Keyboard is available
-                if (Keyboard.current == null)
-                {
-                    Debug.LogWarning($"[NetworkedSwitch {switchId}] Keyboard.current is NULL!");
-                    return;
-                }
-
-                // Check for E key press
-                if (Keyboard.current.eKey.wasPressedThisFrame)
-                {
-                    Debug.Log($"[NetworkedSwitch {switchId}] E KEY PRESSED! Activating switch...");
-                    ActivateSwitch();
-                }
+                ActivateSwitch();
             }
         }
 
         private void ActivateSwitch()
         {
-            Debug.Log(
-                $"[NetworkedSwitch {switchId}] ActivateSwitch called! isToggle={isToggle}, isActive={isActive}"
-            );
-
             if (!isToggle && isActive)
-            {
-                Debug.Log(
-                    $"[NetworkedSwitch {switchId}] Already active and not a toggle - ignoring"
-                );
-                return; // Can't activate again if not a toggle
-            }
+                return;
 
             bool newState = isToggle ? !isActive : true;
-            Debug.Log($"[NetworkedSwitch {switchId}] Sending RPC with newState={newState}");
 
-            // Send to PuzzleManager (will sync across network)
             if (PuzzleManager.Instance != null)
             {
                 PuzzleManager.Instance.ActivateSwitchServerRpc(switchId, newState);
-            }
-            else
-            {
-                Debug.LogError($"[NetworkedSwitch {switchId}] PuzzleManager.Instance is NULL!");
             }
         }
 
@@ -135,7 +111,6 @@ namespace VeilOfColours.Puzzle
         {
             isActive = newState;
             UpdateVisuals();
-            Debug.Log($"[NetworkedSwitch {switchId}] State changed to: {newState}");
         }
 
         private void UpdateVisuals()
@@ -146,13 +121,11 @@ namespace VeilOfColours.Puzzle
             }
         }
 
-        // Trigger detection for player proximity
         private void OnTriggerEnter2D(Collider2D other)
         {
             if (other.CompareTag("Player"))
             {
                 isPlayerNearby = true;
-                Debug.Log($"[NetworkedSwitch {switchId}] Player nearby - Press E to activate");
             }
         }
 

@@ -46,24 +46,16 @@ namespace VeilOfColours.Puzzle
 
         public override void OnNetworkSpawn()
         {
-            // Subscribe to network variable changes
             SwitchA.OnValueChanged += (oldValue, newValue) => OnSwitchAChanged?.Invoke(newValue);
             SwitchB.OnValueChanged += (oldValue, newValue) => OnSwitchBChanged?.Invoke(newValue);
             DoorAOpen.OnValueChanged += (oldValue, newValue) => OnDoorAChanged?.Invoke(newValue);
             CurrentColorIndex.OnValueChanged += (oldValue, newValue) =>
                 OnColorChanged?.Invoke(newValue);
-
-            Debug.Log($"[PuzzleManager] Network spawned on {(IsServer ? "Server" : "Client")}");
         }
 
-        /// <summary>
-        /// Activate a switch - can be called by any player
-        /// </summary>
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void ActivateSwitchServerRpc(string switchId, bool state)
         {
-            Debug.Log($"[PuzzleManager] Switch {switchId} set to {state}");
-
             switch (switchId)
             {
                 case "A":
@@ -81,14 +73,9 @@ namespace VeilOfColours.Puzzle
             }
         }
 
-        /// <summary>
-        /// Set door state - typically triggered by puzzle logic
-        /// </summary>
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void SetDoorStateServerRpc(string doorId, bool open)
         {
-            Debug.Log($"[PuzzleManager] Door {doorId} set to {(open ? "Open" : "Closed")}");
-
             switch (doorId)
             {
                 case "A":
@@ -100,37 +87,25 @@ namespace VeilOfColours.Puzzle
             }
         }
 
-        /// <summary>
-        /// Change the current color - for Hue-like mechanics
-        /// </summary>
         [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
         public void ChangeColorServerRpc(int colorIndex)
         {
-            Debug.Log($"[PuzzleManager] Color changed to index {colorIndex}");
             CurrentColorIndex.Value = colorIndex;
         }
 
-        /// <summary>
-        /// Example: Puzzle logic that runs on server
-        /// When Switch A is active, open Door A (simplified for testing)
-        /// </summary>
         private void Update()
         {
             if (!IsServer)
                 return;
 
-            // Simplified puzzle logic for testing: Switch A opens Door A
             if (SwitchA.Value && !DoorAOpen.Value)
             {
                 DoorAOpen.Value = true;
-                Debug.Log("[PuzzleManager] Switch A active - Door A opened!");
             }
 
-            // Close door when switch is deactivated (if you make it a toggle)
             if (!SwitchA.Value && DoorAOpen.Value)
             {
                 DoorAOpen.Value = false;
-                Debug.Log("[PuzzleManager] Switch A deactivated - Door A closed!");
             }
         }
     }

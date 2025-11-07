@@ -4,11 +4,6 @@ using UnityEngine.InputSystem;
 
 namespace VeilOfColours.Network
 {
-    /// <summary>
-    /// Simple 2D player controller with network support
-    /// Each player controls their own character locally
-    /// No need to sync position since players are in separate levels
-    /// </summary>
     [RequireComponent(typeof(Rigidbody2D))]
     public class SimplePlayer2D : NetworkBehaviour
     {
@@ -32,7 +27,6 @@ namespace VeilOfColours.Network
         private Rigidbody2D rb;
         private bool isGrounded;
         private float horizontalInput;
-        private bool jumpPressed;
 
         private void Awake()
         {
@@ -41,11 +35,9 @@ namespace VeilOfColours.Network
 
         private void Update()
         {
-            // Only allow input for the local player
             if (!IsOwner)
                 return;
 
-            // Get horizontal input (A/D or Arrow keys)
             horizontalInput = 0f;
             if (Keyboard.current != null)
             {
@@ -57,7 +49,6 @@ namespace VeilOfColours.Network
                     horizontalInput = 1f;
             }
 
-            // Jump input (Space)
             if (
                 Keyboard.current != null
                 && Keyboard.current.spaceKey.wasPressedThisFrame
@@ -70,18 +61,14 @@ namespace VeilOfColours.Network
 
         private void FixedUpdate()
         {
-            // Only move the local player
             if (!IsOwner)
                 return;
 
-            // Check if grounded
             isGrounded = Physics2D.OverlapCircle(
                 groundCheck.position,
                 groundCheckRadius,
                 groundLayer
             );
-
-            // Apply movement
             rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
         }
 
@@ -104,7 +91,6 @@ namespace VeilOfColours.Network
         {
             base.OnNetworkSpawn();
 
-            // Assign player to their respective level based on network ID
             if (IsOwner)
             {
                 AssignPlayerToLevel();
@@ -113,9 +99,6 @@ namespace VeilOfColours.Network
 
         private void AssignPlayerToLevel()
         {
-            // Player 1 (Host) goes to Level A spawn
-            // Player 2 (Client) goes to Level B spawn
-
             GameObject spawnPoint = IsServer
                 ? GameObject.FindGameObjectWithTag("SpawnA")
                 : GameObject.FindGameObjectWithTag("SpawnB");
@@ -123,15 +106,6 @@ namespace VeilOfColours.Network
             if (spawnPoint != null)
             {
                 transform.position = spawnPoint.transform.position;
-                Debug.Log(
-                    $"[SimplePlayer2D] Player spawned at {(IsServer ? "Level A" : "Level B")}"
-                );
-            }
-            else
-            {
-                Debug.LogWarning(
-                    "[SimplePlayer2D] No spawn point found! Tag your spawn points as 'SpawnA' or 'SpawnB'"
-                );
             }
         }
     }
