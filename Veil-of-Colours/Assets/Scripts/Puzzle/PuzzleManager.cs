@@ -1,0 +1,137 @@
+using System;
+using Unity.Netcode;
+using UnityEngine;
+
+namespace VeilOfColours.Puzzle
+{
+    /// <summary>
+    /// Central manager for puzzle state synchronization between players
+    /// This handles all shared puzzle variables that affect both levels
+    /// </summary>
+    public class PuzzleManager : NetworkBehaviour
+    {
+        public static PuzzleManager Instance { get; private set; }
+
+        [Header("Puzzle State - Synchronized across network")]
+        // Example: Switch states that can be activated by either player
+        public NetworkVariable<bool> SwitchA = new NetworkVariable<bool>(false);
+        public NetworkVariable<bool> SwitchB = new NetworkVariable<bool>(false);
+        public NetworkVariable<bool> SwitchC = new NetworkVariable<bool>(false);
+        public NetworkVariable<bool> SwitchD = new NetworkVariable<bool>(false);
+
+        // Example: Door states
+        public NetworkVariable<bool> DoorAOpen = new NetworkVariable<bool>(false);
+        public NetworkVariable<bool> DoorBOpen = new NetworkVariable<bool>(false);
+
+        // Example: Color state (for Hue-like mechanics)
+        public NetworkVariable<int> CurrentColorIndex = new NetworkVariable<int>(0);
+
+        // Events that puzzle elements can subscribe to
+        public event Action<bool> OnSwitchAChanged;
+        public event Action<bool> OnSwitchBChanged;
+        public event Action<bool> OnDoorAChanged;
+        public event Action<int> OnColorChanged;
+
+        private void Awake()
+        {
+            // Singleton pattern
+            if (Instance != null && Instance != this)
+            {
+                Destroy(gameObject);
+                return;
+            }
+            Instance = this;
+            DontDestroyOnLoad(gameObject);
+        }
+
+        public override void OnNetworkSpawn()
+        {
+            // Subscribe to network variable changes
+            SwitchA.OnValueChanged += (oldValue, newValue) => OnSwitchAChanged?.Invoke(newValue);
+            SwitchB.OnValueChanged += (oldValue, newValue) => OnSwitchBChanged?.Invoke(newValue);
+            DoorAOpen.OnValueChanged += (oldValue, newValue) => OnDoorAChanged?.Invoke(newValue);
+            CurrentColorIndex.OnValueChanged += (oldValue, newValue) =>
+                OnColorChanged?.Invoke(newValue);
+
+            Debug.Log($"[PuzzleManager] Network spawned on {(IsServer ? "Server" : "Client")}");
+        }
+
+        /// <summary>
+        /// Activate a switch - can be called by any player
+        /// </summary>
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        public void ActivateSwitchServerRpc(string switchId, bool state)
+        {
+            Debug.Log($"[PuzzleManager] Switch {switchId} set to {state}");
+
+            switch (switchId)
+            {
+                case "A":
+                    SwitchA.Value = state;
+                    break;
+                case "B":
+                    SwitchB.Value = state;
+                    break;
+                case "C":
+                    SwitchC.Value = state;
+                    break;
+                case "D":
+                    SwitchD.Value = state;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Set door state - typically triggered by puzzle logic
+        /// </summary>
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        public void SetDoorStateServerRpc(string doorId, bool open)
+        {
+            Debug.Log($"[PuzzleManager] Door {doorId} set to {(open ? "Open" : "Closed")}");
+
+            switch (doorId)
+            {
+                case "A":
+                    DoorAOpen.Value = open;
+                    break;
+                case "B":
+                    DoorBOpen.Value = open;
+                    break;
+            }
+        }
+
+        /// <summary>
+        /// Change the current color - for Hue-like mechanics
+        /// </summary>
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        public void ChangeColorServerRpc(int colorIndex)
+        {
+            Debug.Log($"[PuzzleManager] Color changed to index {colorIndex}");
+            CurrentColorIndex.Value = colorIndex;
+        }
+
+        /// <summary>
+        /// Example: Puzzle logic that runs on server
+        /// When Switch A is active, open Door A (simplified for testing)
+        /// </summary>
+        private void Update()
+        {
+            if (!IsServer)
+                return;
+
+            // Simplified puzzle logic for testing: Switch A opens Door A
+            if (SwitchA.Value && !DoorAOpen.Value)
+            {
+                DoorAOpen.Value = true;
+                Debug.Log("[PuzzleManager] Switch A active - Door A opened!");
+            }
+
+            // Close door when switch is deactivated (if you make it a toggle)
+            if (!SwitchA.Value && DoorAOpen.Value)
+            {
+                DoorAOpen.Value = false;
+                Debug.Log("[PuzzleManager] Switch A deactivated - Door A closed!");
+            }
+        }
+    }
+}
