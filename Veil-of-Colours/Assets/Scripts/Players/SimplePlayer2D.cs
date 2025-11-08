@@ -2,7 +2,7 @@ using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
-namespace VeilOfColours.Network
+namespace VeilOfColours.Players
 {
     [RequireComponent(typeof(Rigidbody2D))]
     public class SimplePlayer2D : NetworkBehaviour
@@ -94,6 +94,11 @@ namespace VeilOfColours.Network
             if (IsOwner)
             {
                 AssignPlayerToLevel();
+                AssignCamera();
+            }
+            else
+            {
+                DisableNonOwnerCamera();
             }
         }
 
@@ -106,6 +111,37 @@ namespace VeilOfColours.Network
             if (spawnPoint != null)
             {
                 transform.position = spawnPoint.transform.position;
+            }
+        }
+
+        private void AssignCamera()
+        {
+            string cameraTag = IsServer ? "CameraA" : "CameraB";
+            GameObject cameraObject = GameObject.FindGameObjectWithTag(cameraTag);
+
+            if (cameraObject != null)
+            {
+                Camera cam = cameraObject.GetComponent<Camera>();
+                if (cam != null)
+                {
+                    cam.enabled = true;
+                    cam.rect = new Rect(0f, 0f, 1f, 1f);
+                }
+            }
+        }
+
+        private void DisableNonOwnerCamera()
+        {
+            string otherCameraTag = IsServer ? "CameraB" : "CameraA";
+            GameObject otherCamera = GameObject.FindGameObjectWithTag(otherCameraTag);
+
+            if (otherCamera != null)
+            {
+                Camera cam = otherCamera.GetComponent<Camera>();
+                if (cam != null)
+                {
+                    cam.enabled = false;
+                }
             }
         }
     }
