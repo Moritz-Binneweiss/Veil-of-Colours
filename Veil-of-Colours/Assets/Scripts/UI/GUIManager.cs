@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using VeilOfColours.General;
 
 namespace VeilOfColours.Network
 {
@@ -11,6 +12,10 @@ namespace VeilOfColours.Network
         [Header("UI References")]
         [SerializeField]
         private GameObject networkUICanvas;
+
+        [Header("Manager References")]
+        [SerializeField]
+        private LevelManager levelManager;
 
         private void Start()
         {
@@ -47,6 +52,12 @@ namespace VeilOfColours.Network
             if (networkUICanvas != null)
             {
                 networkUICanvas.SetActive(false);
+            }
+
+            // Disable main camera when game starts
+            if (levelManager != null)
+            {
+                levelManager.DisableMainCamera();
             }
         }
 

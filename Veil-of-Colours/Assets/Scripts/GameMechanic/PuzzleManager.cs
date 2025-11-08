@@ -30,6 +30,7 @@ namespace VeilOfColours.Puzzle
         public event Action<bool> OnSwitchAChanged;
         public event Action<bool> OnSwitchBChanged;
         public event Action<bool> OnDoorAChanged;
+        public event Action<bool> OnDoorBChanged;
         public event Action<int> OnColorChanged;
 
         private void Awake()
@@ -49,6 +50,7 @@ namespace VeilOfColours.Puzzle
             SwitchA.OnValueChanged += (oldValue, newValue) => OnSwitchAChanged?.Invoke(newValue);
             SwitchB.OnValueChanged += (oldValue, newValue) => OnSwitchBChanged?.Invoke(newValue);
             DoorAOpen.OnValueChanged += (oldValue, newValue) => OnDoorAChanged?.Invoke(newValue);
+            DoorBOpen.OnValueChanged += (oldValue, newValue) => OnDoorBChanged?.Invoke(newValue);
             CurrentColorIndex.OnValueChanged += (oldValue, newValue) =>
                 OnColorChanged?.Invoke(newValue);
         }
@@ -98,12 +100,24 @@ namespace VeilOfColours.Puzzle
             if (!IsServer)
                 return;
 
-            if (SwitchA.Value && !DoorAOpen.Value)
+            // Cross-Level Puzzle: Switch A (Level A) opens Door B (Level B)
+            if (SwitchA.Value && !DoorBOpen.Value)
+            {
+                DoorBOpen.Value = true;
+            }
+
+            if (!SwitchA.Value && DoorBOpen.Value)
+            {
+                DoorBOpen.Value = false;
+            }
+
+            // Cross-Level Puzzle: Switch B (Level B) opens Door A (Level A)
+            if (SwitchB.Value && !DoorAOpen.Value)
             {
                 DoorAOpen.Value = true;
             }
 
-            if (!SwitchA.Value && DoorAOpen.Value)
+            if (!SwitchB.Value && DoorAOpen.Value)
             {
                 DoorAOpen.Value = false;
             }

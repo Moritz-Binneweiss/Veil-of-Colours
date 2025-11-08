@@ -72,6 +72,10 @@ namespace VeilOfColours.Puzzle
             {
                 OnDoorStateChanged(true);
             }
+            else if (doorId == "B" && PuzzleManager.Instance.DoorBOpen.Value)
+            {
+                OnDoorStateChanged(true);
+            }
         }
 
         private void OnDisable()
@@ -89,6 +93,9 @@ namespace VeilOfColours.Puzzle
                 case "A":
                     PuzzleManager.Instance.OnDoorAChanged += OnDoorStateChanged;
                     break;
+                case "B":
+                    PuzzleManager.Instance.OnDoorBChanged += OnDoorStateChanged;
+                    break;
             }
         }
 
@@ -98,6 +105,9 @@ namespace VeilOfColours.Puzzle
             {
                 case "A":
                     PuzzleManager.Instance.OnDoorAChanged -= OnDoorStateChanged;
+                    break;
+                case "B":
+                    PuzzleManager.Instance.OnDoorBChanged -= OnDoorStateChanged;
                     break;
             }
         }
