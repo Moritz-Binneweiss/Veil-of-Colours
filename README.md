@@ -40,3 +40,14 @@ Besprechung:
 Ziel:
 - erster Networking Protoyp
 - Projekt genauer ausarbeiten
+
+#### **10.11.2025**
+
+Besprechung:
+
+- Basic Networking Test Prototype gezeigt
+
+Ziel:
+- Networking Prototype ausarbeiten
+- Basic Player Movement und Animation erweitern
+- Tilesets anschauen und einarbeiten
