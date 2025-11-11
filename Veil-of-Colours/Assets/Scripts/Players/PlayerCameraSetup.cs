@@ -4,9 +4,8 @@ using UnityEngine;
 namespace VeilOfColours.Players
 {
     /// <summary>
-    /// Alternative camera setup with Cinemachine support.
-    /// Can be used instead of the camera logic in SimplePlayer2D.cs
-    /// Requires Cinemachine package and assembly reference.
+    /// Simple camera setup without Cinemachine.
+    /// Camera follows the player with smooth lerp.
     /// </summary>
     public class PlayerCameraSetup : NetworkBehaviour
     {
@@ -16,6 +15,15 @@ namespace VeilOfColours.Players
 
         [SerializeField]
         private string levelBCameraTag = "CameraB";
+
+        [Header("Camera Follow")]
+        [SerializeField]
+        private Vector3 cameraOffset = new Vector3(0, 2, -10);
+
+        [SerializeField]
+        private float cameraSmoothing = 5f;
+
+        private Camera assignedCamera;
 
         public override void OnNetworkSpawn()
         {
@@ -27,6 +35,20 @@ namespace VeilOfColours.Players
             AssignCamera();
         }
 
+        private void LateUpdate()
+        {
+            if (!IsOwner || assignedCamera == null)
+                return;
+
+            // Smooth camera follow
+            Vector3 targetPosition = transform.position + cameraOffset;
+            assignedCamera.transform.position = Vector3.Lerp(
+                assignedCamera.transform.position,
+                targetPosition,
+                Time.deltaTime * cameraSmoothing
+            );
+        }
+
         private void AssignCamera()
         {
             string cameraTag = IsServer ? levelACameraTag : levelBCameraTag;
@@ -34,23 +56,20 @@ namespace VeilOfColours.Players
 
             if (cameraObject != null)
             {
-                Camera cam = cameraObject.GetComponent<Camera>();
-                if (cam != null)
+                assignedCamera = cameraObject.GetComponent<Camera>();
+                if (assignedCamera != null)
                 {
-                    cam.enabled = true;
-                    cam.rect = new Rect(0f, 0f, 1f, 1f);
+                    assignedCamera.enabled = true;
+                    Debug.Log($"Activated camera: {cameraObject.name}");
                 }
-
-                // For Cinemachine support, uncomment and add assembly reference:
-                /*
-                var cinemachineCamera = cameraObject.GetComponent<Unity.Cinemachine.CinemachineCamera>();
-                if (cinemachineCamera != null)
+                else
                 {
-                    cinemachineCamera.Follow = transform;
-                    cinemachineCamera.LookAt = transform;
-                    cinemachineCamera.Priority.Value = 10;
+                    Debug.LogError($"No Camera component found on {cameraObject.name}!");
                 }
-                */
+            }
+            else
+            {
+                Debug.LogError($"Camera with tag '{cameraTag}' not found!");
             }
         }
     }

@@ -24,9 +24,17 @@ namespace VeilOfColours.Players
         [SerializeField]
         private LayerMask groundLayer;
 
+        [Header("Camera Follow")]
+        [SerializeField]
+        private Vector3 cameraOffset = new Vector3(0, 2, -10);
+
+        [SerializeField]
+        private float cameraSmoothing = 5f;
+
         private Rigidbody2D rb;
         private bool isGrounded;
-        private float horizontalInput;
+        private Vector2 moveInput;
+        private Camera assignedCamera;
 
         private void Awake()
         {
@@ -38,24 +46,36 @@ namespace VeilOfColours.Players
             if (!IsOwner)
                 return;
 
-            horizontalInput = 0f;
-            if (Keyboard.current != null)
+            // Lese Movement Input (neues Input System - direkter Zugriff)
+            moveInput = Vector2.zero;
+
+            var keyboard = Keyboard.current;
+            if (keyboard != null)
             {
-                if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
-                    horizontalInput = -1f;
-                else if (
-                    Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed
-                )
-                    horizontalInput = 1f;
+                if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
+                    moveInput.x = -1f;
+                else if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
+                    moveInput.x = 1f;
+
+                // Jump mit Space
+                if (keyboard.spaceKey.wasPressedThisFrame && isGrounded)
+                {
+                    Jump();
+                }
             }
 
-            if (
-                Keyboard.current != null
-                && Keyboard.current.spaceKey.wasPressedThisFrame
-                && isGrounded
-            )
+            // Gamepad Support (optional)
+            var gamepad = Gamepad.current;
+            if (gamepad != null)
             {
-                Jump();
+                var stickInput = gamepad.leftStick.ReadValue();
+                if (Mathf.Abs(stickInput.x) > 0.1f)
+                    moveInput.x = stickInput.x;
+
+                if (gamepad.buttonSouth.wasPressedThisFrame && isGrounded)
+                {
+                    Jump();
+                }
             }
         }
 
@@ -69,7 +89,23 @@ namespace VeilOfColours.Players
                 groundCheckRadius,
                 groundLayer
             );
-            rb.linearVelocity = new Vector2(horizontalInput * moveSpeed, rb.linearVelocity.y);
+
+            // Nutze moveInput.x für horizontale Bewegung
+            rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+        }
+
+        private void LateUpdate()
+        {
+            if (!IsOwner || assignedCamera == null)
+                return;
+
+            // Smooth camera follow
+            Vector3 targetPosition = transform.position + cameraOffset;
+            assignedCamera.transform.position = Vector3.Lerp(
+                assignedCamera.transform.position,
+                targetPosition,
+                Time.deltaTime * cameraSmoothing
+            );
         }
 
         private void Jump()
@@ -121,17 +157,26 @@ namespace VeilOfColours.Players
 
             if (cameraObject != null)
             {
-                Camera cam = cameraObject.GetComponent<Camera>();
-                if (cam != null)
+                assignedCamera = cameraObject.GetComponent<Camera>();
+                if (assignedCamera != null)
                 {
-                    cam.enabled = true;
-                    cam.rect = new Rect(0f, 0f, 1f, 1f);
+                    assignedCamera.enabled = true;
+                    Debug.Log($"Activated camera: {cameraObject.name}");
                 }
+                else
+                {
+                    Debug.LogError($"No Camera component found on {cameraObject.name}!");
+                }
+            }
+            else
+            {
+                Debug.LogError($"Camera with tag '{cameraTag}' not found!");
             }
         }
 
         private void DisableNonOwnerCamera()
         {
+            // Stelle sicher, dass die andere Kamera deaktiviert bleibt
             string otherCameraTag = IsServer ? "CameraB" : "CameraA";
             GameObject otherCamera = GameObject.FindGameObjectWithTag(otherCameraTag);
 
@@ -141,6 +186,7 @@ namespace VeilOfColours.Players
                 if (cam != null)
                 {
                     cam.enabled = false;
+                    Debug.Log($"Disabled non-owner camera: {otherCamera.name}");
                 }
             }
         }
