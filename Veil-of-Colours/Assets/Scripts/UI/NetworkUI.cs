@@ -29,13 +29,12 @@ namespace VeilOfColours.Network
             hostButton.onClick.AddListener(OnHostClicked);
             clientButton.onClick.AddListener(OnClientClicked);
 
-            // Zeige die lokale IP-Adresse an
             DisplayLocalIP();
 
             // Setze Standard-IP für lokales Testen
             if (ipAddressInput != null)
             {
-                ipAddressInput.text = "127.0.0.1"; // localhost als Standard
+                ipAddressInput.text = "127.0.0.1"; //192.168.1.XXX
             }
 
             UpdateStatusText("Ready to connect...");
@@ -75,11 +74,10 @@ namespace VeilOfColours.Network
         {
             UpdateStatusText("Starting as Host...");
 
-            // Host verwendet immer die eigene IP
             var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
             if (transport != null)
             {
-                transport.ConnectionData.Address = "0.0.0.0"; // Lauscht auf allen Interfaces
+                transport.ConnectionData.Address = "0.0.0.0";
                 transport.ConnectionData.Port = 7777;
                 Debug.Log($"Host starting on port 7777");
             }
