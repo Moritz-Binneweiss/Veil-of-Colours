@@ -434,7 +434,7 @@ GameObject:
   - component: {fileID: 4284401973749256574}
   - component: {fileID: 7653657506260876698}
   m_Layer: 0
-  m_Name: Test
+  m_Name: PlayerOne
   m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -597,7 +597,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1314010385
+  GlobalObjectIdHash: 3214411214
   InScenePlacedSourceGlobalObjectIdHash: 1698627826
   DeferredDespawnTick: 0
   Ownership: 1
@@ -623,8 +623,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VeilOfColours.Network.SimplePlayer2D
   ShowTopMostFoldoutHeaderGroup: 1
-  moveSpeed: 5
-  jumpForce: 15
+  moveSpeed: 10
+  jumpForce: 10
   groundCheck: {fileID: 5189023657513006131}
   groundCheckRadius: 0.2
   groundLayer:

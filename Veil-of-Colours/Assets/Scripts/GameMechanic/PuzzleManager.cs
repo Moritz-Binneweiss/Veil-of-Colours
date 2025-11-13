@@ -5,28 +5,23 @@ using UnityEngine;
 namespace VeilOfColours.Puzzle
 {
     /// <summary>
-    /// Central manager for puzzle state synchronization between players
-    /// This handles all shared puzzle variables that affect both levels
+    /// Central manager for puzzle state synchronization between players.
     /// </summary>
     public class PuzzleManager : NetworkBehaviour
     {
         public static PuzzleManager Instance { get; private set; }
 
-        [Header("Puzzle State - Synchronized across network")]
-        // Example: Switch states that can be activated by either player
+        [Header("Puzzle State")]
         public NetworkVariable<bool> SwitchA = new NetworkVariable<bool>(false);
         public NetworkVariable<bool> SwitchB = new NetworkVariable<bool>(false);
         public NetworkVariable<bool> SwitchC = new NetworkVariable<bool>(false);
         public NetworkVariable<bool> SwitchD = new NetworkVariable<bool>(false);
 
-        // Example: Door states
         public NetworkVariable<bool> DoorAOpen = new NetworkVariable<bool>(false);
         public NetworkVariable<bool> DoorBOpen = new NetworkVariable<bool>(false);
 
-        // Example: Color state (for Hue-like mechanics)
         public NetworkVariable<int> CurrentColorIndex = new NetworkVariable<int>(0);
 
-        // Events that puzzle elements can subscribe to
         public event Action<bool> OnSwitchAChanged;
         public event Action<bool> OnSwitchBChanged;
         public event Action<bool> OnDoorAChanged;
@@ -35,7 +30,6 @@ namespace VeilOfColours.Puzzle
 
         private void Awake()
         {
-            // Singleton pattern
             if (Instance != null && Instance != this)
             {
                 Destroy(gameObject);

@@ -4,8 +4,8 @@ using UnityEngine;
 namespace VeilOfColours.Players
 {
     /// <summary>
-    /// Simple camera setup without Cinemachine.
-    /// Camera follows the player with smooth lerp.
+    /// Alternative camera setup for scene-placed cameras with tags.
+    /// Not needed if using camera as player child.
     /// </summary>
     public class PlayerCameraSetup : NetworkBehaviour
     {
@@ -40,7 +40,6 @@ namespace VeilOfColours.Players
             if (!IsOwner || assignedCamera == null)
                 return;
 
-            // Smooth camera follow
             Vector3 targetPosition = transform.position + cameraOffset;
             assignedCamera.transform.position = Vector3.Lerp(
                 assignedCamera.transform.position,
@@ -58,18 +57,7 @@ namespace VeilOfColours.Players
             {
                 assignedCamera = cameraObject.GetComponent<Camera>();
                 if (assignedCamera != null)
-                {
                     assignedCamera.enabled = true;
-                    Debug.Log($"Activated camera: {cameraObject.name}");
-                }
-                else
-                {
-                    Debug.LogError($"No Camera component found on {cameraObject.name}!");
-                }
-            }
-            else
-            {
-                Debug.LogError($"Camera with tag '{cameraTag}' not found!");
             }
         }
     }

@@ -4,24 +4,23 @@ using UnityEngine;
 namespace VeilOfColours.Puzzle
 {
     /// <summary>
-    /// A door that opens/closes based on networked puzzle state
-    /// Reacts to switches being activated by either player
+    /// Door that opens/closes based on networked puzzle state.
     /// </summary>
     public class NetworkedDoor : MonoBehaviour
     {
         [Header("Door Settings")]
         [SerializeField]
-        private string doorId = "A"; // Which door in PuzzleManager (A, B, etc.)
+        private string doorId = "A";
 
         [Header("Animation Settings")]
         [SerializeField]
-        private float moveDistance = 3f; // How far the door moves when opening
+        private float moveDistance = 3f;
 
         [SerializeField]
         private float moveSpeed = 2f;
 
         [SerializeField]
-        private bool moveVertically = true; // true = up/down, false = left/right
+        private bool moveVertically = true;
 
         [Header("Components")]
         [SerializeField]

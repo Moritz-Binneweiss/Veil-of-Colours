@@ -31,11 +31,8 @@ namespace VeilOfColours.Network
 
             DisplayLocalIP();
 
-            // Setze Standard-IP für lokales Testen
             if (ipAddressInput != null)
-            {
-                ipAddressInput.text = "127.0.0.1"; //192.168.1.XXX
-            }
+                ipAddressInput.text = "127.0.0.1";
 
             UpdateStatusText("Ready to connect...");
         }
@@ -44,10 +41,7 @@ namespace VeilOfColours.Network
         {
             string localIP = GetLocalIPAddress();
             if (localIPText != null)
-            {
                 localIPText.text = $"Your IP: {localIP}";
-            }
-            Debug.Log($"Local IP Address: {localIP}");
         }
 
         private string GetLocalIPAddress()
@@ -79,7 +73,6 @@ namespace VeilOfColours.Network
             {
                 transport.ConnectionData.Address = "0.0.0.0";
                 transport.ConnectionData.Port = 7777;
-                Debug.Log($"Host starting on port 7777");
             }
 
             NetworkManager.Singleton.StartHost();
@@ -100,7 +93,6 @@ namespace VeilOfColours.Network
             {
                 transport.ConnectionData.Address = ipAddressInput.text;
                 transport.ConnectionData.Port = 7777;
-                Debug.Log($"Client connecting to {ipAddressInput.text}:7777");
             }
 
             NetworkManager.Singleton.StartClient();

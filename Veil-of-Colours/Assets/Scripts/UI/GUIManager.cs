@@ -5,7 +5,7 @@ using VeilOfColours.General;
 namespace VeilOfColours.Network
 {
     /// <summary>
-    /// Manages all GUI elements and their visibility during gameplay
+    /// Manages GUI visibility during gameplay.
     /// </summary>
     public class GUIManager : MonoBehaviour
     {
@@ -19,7 +19,6 @@ namespace VeilOfColours.Network
 
         private void Start()
         {
-            // Subscribe to network events
             if (NetworkManager.Singleton != null)
             {
                 NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
@@ -29,7 +28,6 @@ namespace VeilOfColours.Network
 
         private void OnDestroy()
         {
-            // Unsubscribe from events
             if (NetworkManager.Singleton != null)
             {
                 NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
@@ -50,15 +48,10 @@ namespace VeilOfColours.Network
         private void HideNetworkUI()
         {
             if (networkUICanvas != null)
-            {
                 networkUICanvas.SetActive(false);
-            }
 
-            // Disable main camera when game starts
             if (levelManager != null)
-            {
                 levelManager.DisableMainCamera();
-            }
         }
 
         public void ShowNetworkUI()

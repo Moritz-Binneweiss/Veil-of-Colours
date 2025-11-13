@@ -5,17 +5,16 @@ using UnityEngine.InputSystem;
 namespace VeilOfColours.Puzzle
 {
     /// <summary>
-    /// A switch that can be activated by a player and syncs across the network
-    /// When activated, it updates the PuzzleManager state
+    /// Player-activated switch that syncs state across network.
     /// </summary>
     public class NetworkedSwitch : MonoBehaviour
     {
         [Header("Switch Settings")]
         [SerializeField]
-        private string switchId = "A"; // Which switch in PuzzleManager (A, B, C, D)
+        private string switchId = "A";
 
         [SerializeField]
-        private bool isToggle = false; // Toggle or one-time activation?
+        private bool isToggle = false;
 
         [Header("Visual Feedback")]
         [SerializeField]
@@ -40,20 +39,14 @@ namespace VeilOfColours.Puzzle
 
         private void OnEnable()
         {
-            // Subscribe to puzzle manager events
             if (PuzzleManager.Instance != null)
-            {
                 SubscribeToEvents();
-            }
         }
 
         private void OnDisable()
         {
-            // Unsubscribe from events
             if (PuzzleManager.Instance != null)
-            {
                 UnsubscribeFromEvents();
-            }
         }
 
         private void SubscribeToEvents()
