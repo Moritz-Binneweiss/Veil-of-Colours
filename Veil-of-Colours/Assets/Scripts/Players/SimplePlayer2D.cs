@@ -35,10 +35,15 @@ namespace VeilOfColours.Players
         private bool isGrounded;
         private Vector2 moveInput;
         private Camera assignedCamera;
+        private Animator animator;
 
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
+            animator = GetComponent<Animator>();
+            
+            // Verhindere, dass der Spieler umkippt
+            rb.constraints = RigidbodyConstraints2D.FreezeRotation;
         }
 
         private void Update()
@@ -92,6 +97,13 @@ namespace VeilOfColours.Players
 
             // Nutze moveInput.x für horizontale Bewegung
             rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+
+            // Update animator
+            if (animator != null)
+            {
+                bool isWalking = Mathf.Abs(moveInput.x) > 0.01f;
+                animator.SetBool("isWalking", isWalking);
+            }
         }
 
         private void LateUpdate()
