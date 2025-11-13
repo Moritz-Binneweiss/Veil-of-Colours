@@ -94,27 +94,19 @@ namespace VeilOfColours.Puzzle
             if (!IsServer)
                 return;
 
-            // Cross-Level Puzzle: Switch A (Level A) opens Door B (Level B)
-            if (SwitchA.Value && !DoorBOpen.Value)
-            {
-                DoorBOpen.Value = true;
-            }
+            UpdateCrossLevelPuzzles();
+        }
 
-            if (!SwitchA.Value && DoorBOpen.Value)
-            {
-                DoorBOpen.Value = false;
-            }
+        private void UpdateCrossLevelPuzzles()
+        {
+            SyncDoorWithSwitch(SwitchA.Value, ref DoorBOpen);
+            SyncDoorWithSwitch(SwitchB.Value, ref DoorAOpen);
+        }
 
-            // Cross-Level Puzzle: Switch B (Level B) opens Door A (Level A)
-            if (SwitchB.Value && !DoorAOpen.Value)
-            {
-                DoorAOpen.Value = true;
-            }
-
-            if (!SwitchB.Value && DoorAOpen.Value)
-            {
-                DoorAOpen.Value = false;
-            }
+        private void SyncDoorWithSwitch(bool switchState, ref NetworkVariable<bool> door)
+        {
+            if (door.Value != switchState)
+                door.Value = switchState;
         }
     }
 }

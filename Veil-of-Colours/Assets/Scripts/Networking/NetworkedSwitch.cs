@@ -14,7 +14,7 @@ namespace VeilOfColours.Puzzle
         private string switchId = "A";
 
         [SerializeField]
-        private bool isToggle = false;
+        private bool isToggle;
 
         [Header("Visual Feedback")]
         [SerializeField]
@@ -26,8 +26,8 @@ namespace VeilOfColours.Puzzle
         [SerializeField]
         private Color activeColor = Color.green;
 
-        private bool isPlayerNearby = false;
-        private bool isActive = false;
+        private bool isPlayerNearby;
+        private bool isActive;
 
         private void Start()
         {
@@ -77,14 +77,8 @@ namespace VeilOfColours.Puzzle
 
         private void Update()
         {
-            if (
-                isPlayerNearby
-                && Keyboard.current != null
-                && Keyboard.current.eKey.wasPressedThisFrame
-            )
-            {
+            if (isPlayerNearby && Keyboard.current?.eKey.wasPressedThisFrame == true)
                 ActivateSwitch();
-            }
         }
 
         private void ActivateSwitch()
@@ -92,12 +86,11 @@ namespace VeilOfColours.Puzzle
             if (!isToggle && isActive)
                 return;
 
-            bool newState = isToggle ? !isActive : true;
+            if (PuzzleManager.Instance == null)
+                return;
 
-            if (PuzzleManager.Instance != null)
-            {
-                PuzzleManager.Instance.ActivateSwitchServerRpc(switchId, newState);
-            }
+            bool newState = isToggle ? !isActive : true;
+            PuzzleManager.Instance.ActivateSwitchServerRpc(switchId, newState);
         }
 
         private void OnSwitchStateChanged(bool newState)

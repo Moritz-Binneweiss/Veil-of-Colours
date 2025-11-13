@@ -29,10 +29,8 @@ namespace VeilOfColours.Players
         {
             base.OnNetworkSpawn();
 
-            if (!IsOwner)
-                return;
-
-            AssignCamera();
+            if (IsOwner)
+                AssignCamera();
         }
 
         private void LateUpdate()
@@ -40,6 +38,11 @@ namespace VeilOfColours.Players
             if (!IsOwner || assignedCamera == null)
                 return;
 
+            UpdateCameraPosition();
+        }
+
+        private void UpdateCameraPosition()
+        {
             Vector3 targetPosition = transform.position + cameraOffset;
             assignedCamera.transform.position = Vector3.Lerp(
                 assignedCamera.transform.position,
@@ -53,11 +56,14 @@ namespace VeilOfColours.Players
             string cameraTag = IsServer ? levelACameraTag : levelBCameraTag;
             GameObject cameraObject = GameObject.FindGameObjectWithTag(cameraTag);
 
-            if (cameraObject != null)
+            if (cameraObject == null)
+                return;
+
+            assignedCamera = cameraObject.GetComponent<Camera>();
+            if (assignedCamera != null)
             {
-                assignedCamera = cameraObject.GetComponent<Camera>();
-                if (assignedCamera != null)
-                    assignedCamera.enabled = true;
+                assignedCamera.transform.position = transform.position + cameraOffset;
+                assignedCamera.enabled = true;
             }
         }
     }

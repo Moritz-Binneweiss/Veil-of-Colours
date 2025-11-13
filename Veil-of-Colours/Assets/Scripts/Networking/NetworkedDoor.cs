@@ -8,6 +8,9 @@ namespace VeilOfColours.Puzzle
     /// </summary>
     public class NetworkedDoor : MonoBehaviour
     {
+        private const float PuzzleManagerCheckInterval = 0.1f;
+        private const float PositionTolerance = 0.01f;
+
         [Header("Door Settings")]
         [SerializeField]
         private string doorId = "A";
@@ -31,19 +34,28 @@ namespace VeilOfColours.Puzzle
 
         private Vector3 closedPosition;
         private Vector3 openPosition;
-        private bool isOpen = false;
-        private bool isMoving = false;
+        private bool isOpen;
+        private bool isMoving;
 
         private void Start()
+        {
+            CacheComponents();
+            CalculatePositions();
+        }
+
+        private void CacheComponents()
         {
             if (doorCollider == null)
                 doorCollider = GetComponent<Collider2D>();
             if (spriteRenderer == null)
                 spriteRenderer = GetComponent<SpriteRenderer>();
+        }
 
+        private void CalculatePositions()
+        {
             closedPosition = transform.position;
             Vector3 moveDirection = moveVertically ? Vector3.up : Vector3.right;
-            openPosition = closedPosition + (moveDirection * moveDistance);
+            openPosition = closedPosition + moveDirection * moveDistance;
         }
 
         private void OnEnable()
@@ -60,21 +72,26 @@ namespace VeilOfColours.Puzzle
 
         private System.Collections.IEnumerator WaitForPuzzleManager()
         {
+            var wait = new WaitForSeconds(PuzzleManagerCheckInterval);
+
             while (PuzzleManager.Instance == null)
-            {
-                yield return new WaitForSeconds(0.1f);
-            }
+                yield return wait;
 
             SubscribeToDoorEvents();
+            InitializeDoorState();
+        }
 
-            if (doorId == "A" && PuzzleManager.Instance.DoorAOpen.Value)
+        private void InitializeDoorState()
+        {
+            bool shouldBeOpen = doorId switch
             {
+                "A" => PuzzleManager.Instance.DoorAOpen.Value,
+                "B" => PuzzleManager.Instance.DoorBOpen.Value,
+                _ => false,
+            };
+
+            if (shouldBeOpen)
                 OnDoorStateChanged(true);
-            }
-            else if (doorId == "B" && PuzzleManager.Instance.DoorBOpen.Value)
-            {
-                OnDoorStateChanged(true);
-            }
         }
 
         private void OnDisable()
@@ -132,14 +149,19 @@ namespace VeilOfColours.Puzzle
                 moveSpeed * Time.deltaTime
             );
 
-            if (Vector3.Distance(transform.position, targetPosition) < 0.01f)
+            if (Vector3.Distance(transform.position, targetPosition) < PositionTolerance)
             {
-                transform.position = targetPosition;
-                isMoving = false;
-
-                if (doorCollider != null)
-                    doorCollider.enabled = !isOpen;
+                OnReachedTarget(targetPosition);
             }
+        }
+
+        private void OnReachedTarget(Vector3 targetPosition)
+        {
+            transform.position = targetPosition;
+            isMoving = false;
+
+            if (doorCollider != null)
+                doorCollider.enabled = !isOpen;
         }
 
         private void OnDrawGizmos()

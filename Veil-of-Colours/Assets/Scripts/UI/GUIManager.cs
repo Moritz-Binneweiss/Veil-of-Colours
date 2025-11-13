@@ -19,20 +19,30 @@ namespace VeilOfColours.Network
 
         private void Start()
         {
-            if (NetworkManager.Singleton != null)
-            {
-                NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-                NetworkManager.Singleton.OnServerStarted += OnServerStarted;
-            }
+            SubscribeToNetworkEvents();
         }
 
         private void OnDestroy()
         {
-            if (NetworkManager.Singleton != null)
-            {
-                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
-                NetworkManager.Singleton.OnServerStarted -= OnServerStarted;
-            }
+            UnsubscribeFromNetworkEvents();
+        }
+
+        private void SubscribeToNetworkEvents()
+        {
+            if (NetworkManager.Singleton == null)
+                return;
+
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnServerStarted += OnServerStarted;
+        }
+
+        private void UnsubscribeFromNetworkEvents()
+        {
+            if (NetworkManager.Singleton == null)
+                return;
+
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.Singleton.OnServerStarted -= OnServerStarted;
         }
 
         private void OnServerStarted()
@@ -47,19 +57,19 @@ namespace VeilOfColours.Network
 
         private void HideNetworkUI()
         {
-            if (networkUICanvas != null)
-                networkUICanvas.SetActive(false);
-
-            if (levelManager != null)
-                levelManager.DisableMainCamera();
+            SetNetworkUIActive(false);
+            levelManager?.DisableMainCamera();
         }
 
         public void ShowNetworkUI()
         {
+            SetNetworkUIActive(true);
+        }
+
+        private void SetNetworkUIActive(bool active)
+        {
             if (networkUICanvas != null)
-            {
-                networkUICanvas.SetActive(true);
-            }
+                networkUICanvas.SetActive(active);
         }
     }
 }

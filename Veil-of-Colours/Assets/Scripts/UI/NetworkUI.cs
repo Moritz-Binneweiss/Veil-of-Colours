@@ -8,6 +8,10 @@ namespace VeilOfColours.Network
 {
     public class NetworkUI : MonoBehaviour
     {
+        private const string DefaultIP = "127.0.0.1";
+        private const ushort DefaultPort = 7777;
+        private const string ListenAddress = "0.0.0.0";
+
         [Header("UI Elements")]
         [SerializeField]
         private Button hostButton;
@@ -26,22 +30,29 @@ namespace VeilOfColours.Network
 
         private void Start()
         {
-            hostButton.onClick.AddListener(OnHostClicked);
-            clientButton.onClick.AddListener(OnClientClicked);
+            InitializeUI();
+        }
+
+        private void InitializeUI()
+        {
+            if (hostButton != null)
+                hostButton.onClick.AddListener(OnHostClicked);
+
+            if (clientButton != null)
+                clientButton.onClick.AddListener(OnClientClicked);
 
             DisplayLocalIP();
 
             if (ipAddressInput != null)
-                ipAddressInput.text = "127.0.0.1";
+                ipAddressInput.text = DefaultIP;
 
             UpdateStatusText("Ready to connect...");
         }
 
         private void DisplayLocalIP()
         {
-            string localIP = GetLocalIPAddress();
             if (localIPText != null)
-                localIPText.text = $"Your IP: {localIP}";
+                localIPText.text = $"Your IP: {GetLocalIPAddress()}";
         }
 
         private string GetLocalIPAddress()
@@ -66,36 +77,47 @@ namespace VeilOfColours.Network
 
         private void OnHostClicked()
         {
+            if (!ValidateNetworkManager())
+                return;
+
             UpdateStatusText("Starting as Host...");
-
-            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            if (transport != null)
-            {
-                transport.ConnectionData.Address = "0.0.0.0";
-                transport.ConnectionData.Port = 7777;
-            }
-
+            ConfigureTransport(ListenAddress);
             NetworkManager.Singleton.StartHost();
         }
 
         private void OnClientClicked()
         {
-            if (ipAddressInput == null || string.IsNullOrEmpty(ipAddressInput.text))
+            if (!ValidateNetworkManager())
+                return;
+
+            if (string.IsNullOrWhiteSpace(ipAddressInput?.text))
             {
                 UpdateStatusText("Please enter Host IP address!");
                 return;
             }
 
             UpdateStatusText($"Connecting to {ipAddressInput.text}...");
-
-            var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();
-            if (transport != null)
-            {
-                transport.ConnectionData.Address = ipAddressInput.text;
-                transport.ConnectionData.Port = 7777;
-            }
-
+            ConfigureTransport(ipAddressInput.text);
             NetworkManager.Singleton.StartClient();
+        }
+
+        private bool ValidateNetworkManager()
+        {
+            if (NetworkManager.Singleton != null)
+                return true;
+
+            UpdateStatusText("Network Manager not found!");
+            return false;
+        }
+
+        private void ConfigureTransport(string address)
+        {
+            var transport = NetworkManager.Singleton?.GetComponent<UnityTransport>();
+            if (transport == null)
+                return;
+
+            transport.ConnectionData.Address = address;
+            transport.ConnectionData.Port = DefaultPort;
         }
 
         private void UpdateStatusText(string message)

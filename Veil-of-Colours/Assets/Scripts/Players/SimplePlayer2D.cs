@@ -7,6 +7,9 @@ namespace VeilOfColours.Players
     [RequireComponent(typeof(Rigidbody2D))]
     public class SimplePlayer2D : NetworkBehaviour
     {
+        private const float GamepadDeadZone = 0.1f;
+        private const float WalkingThreshold = 0.01f;
+
         [Header("Movement Settings")]
         [SerializeField]
         private float moveSpeed = 5f;
@@ -29,9 +32,9 @@ namespace VeilOfColours.Players
         private Camera playerCamera;
 
         private Rigidbody2D rb;
+        private Animator animator;
         private bool isGrounded;
         private Vector2 moveInput;
-        private Animator animator;
 
         private void Awake()
         {
@@ -45,30 +48,44 @@ namespace VeilOfColours.Players
             if (!IsOwner)
                 return;
 
+            ReadInput();
+        }
+
+        private void ReadInput()
+        {
             moveInput = Vector2.zero;
 
-            var keyboard = Keyboard.current;
-            if (keyboard != null)
+            if (Keyboard.current != null)
             {
-                if (keyboard.aKey.isPressed || keyboard.leftArrowKey.isPressed)
-                    moveInput.x = -1f;
-                else if (keyboard.dKey.isPressed || keyboard.rightArrowKey.isPressed)
-                    moveInput.x = 1f;
+                moveInput.x = GetKeyboardInput();
 
-                if (keyboard.spaceKey.wasPressedThisFrame && isGrounded)
+                if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
                     Jump();
             }
 
-            var gamepad = Gamepad.current;
-            if (gamepad != null)
+            if (Gamepad.current != null)
             {
-                var stickInput = gamepad.leftStick.ReadValue();
-                if (Mathf.Abs(stickInput.x) > 0.1f)
+                Vector2 stickInput = Gamepad.current.leftStick.ReadValue();
+                if (Mathf.Abs(stickInput.x) > GamepadDeadZone)
                     moveInput.x = stickInput.x;
 
-                if (gamepad.buttonSouth.wasPressedThisFrame && isGrounded)
+                if (Gamepad.current.buttonSouth.wasPressedThisFrame && isGrounded)
                     Jump();
             }
+        }
+
+        private float GetKeyboardInput()
+        {
+            bool leftPressed =
+                Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed;
+            bool rightPressed =
+                Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed;
+
+            if (leftPressed && !rightPressed)
+                return -1f;
+            if (rightPressed && !leftPressed)
+                return 1f;
+            return 0f;
         }
 
         private void FixedUpdate()
@@ -76,19 +93,32 @@ namespace VeilOfColours.Players
             if (!IsOwner)
                 return;
 
+            CheckGroundState();
+            ApplyMovement();
+            UpdateAnimation();
+        }
+
+        private void CheckGroundState()
+        {
             isGrounded = Physics2D.OverlapCircle(
                 groundCheck.position,
                 groundCheckRadius,
                 groundLayer
             );
+        }
 
+        private void ApplyMovement()
+        {
             rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+        }
 
-            if (animator != null)
-            {
-                bool isWalking = Mathf.Abs(moveInput.x) > 0.01f;
-                animator.SetBool("isWalking", isWalking);
-            }
+        private void UpdateAnimation()
+        {
+            if (animator == null)
+                return;
+
+            bool isWalking = Mathf.Abs(moveInput.x) > WalkingThreshold;
+            animator.SetBool("isWalking", isWalking);
         }
 
         private void Jump()
