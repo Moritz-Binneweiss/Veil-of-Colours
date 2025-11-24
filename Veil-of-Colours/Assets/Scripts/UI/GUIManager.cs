@@ -1,72 +1,66 @@
 using Unity.Netcode;
 using UnityEngine;
-using VeilOfColours.General;
 
-namespace VeilOfColours.Network
+namespace VeilOfColours.UI
 {
-    /// <summary>
-    /// Manages all GUI elements and their visibility during gameplay
-    /// </summary>
     public class GUIManager : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField]
-        private GameObject networkUICanvas;
-
-        [Header("Manager References")]
-        [SerializeField]
-        private LevelManager levelManager;
+        private GameObject gameUICanvas;
 
         private void Start()
         {
-            // Subscribe to network events
-            if (NetworkManager.Singleton != null)
-            {
-                NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
-                NetworkManager.Singleton.OnServerStarted += OnServerStarted;
-            }
+            SubscribeToNetworkEvents();
         }
 
         private void OnDestroy()
         {
-            // Unsubscribe from events
-            if (NetworkManager.Singleton != null)
-            {
-                NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
-                NetworkManager.Singleton.OnServerStarted -= OnServerStarted;
-            }
+            UnsubscribeFromNetworkEvents();
+        }
+
+        private void SubscribeToNetworkEvents()
+        {
+            if (NetworkManager.Singleton == null)
+                return;
+
+            NetworkManager.Singleton.OnClientConnectedCallback += OnClientConnected;
+            NetworkManager.Singleton.OnServerStarted += OnServerStarted;
+        }
+
+        private void UnsubscribeFromNetworkEvents()
+        {
+            if (NetworkManager.Singleton == null)
+                return;
+
+            NetworkManager.Singleton.OnClientConnectedCallback -= OnClientConnected;
+            NetworkManager.Singleton.OnServerStarted -= OnServerStarted;
         }
 
         private void OnServerStarted()
         {
-            HideNetworkUI();
+            ShowGameUI();
         }
 
         private void OnClientConnected(ulong clientId)
         {
-            HideNetworkUI();
+            ShowGameUI();
         }
 
-        private void HideNetworkUI()
+        private void ShowGameUI()
         {
-            if (networkUICanvas != null)
-            {
-                networkUICanvas.SetActive(false);
-            }
-
-            // Disable main camera when game starts
-            if (levelManager != null)
-            {
-                levelManager.DisableMainCamera();
-            }
+            SetGameUIActive(true);
         }
 
-        public void ShowNetworkUI()
+        public void HideGameUI()
         {
-            if (networkUICanvas != null)
-            {
-                networkUICanvas.SetActive(true);
-            }
+            SetGameUIActive(false);
+        }
+
+        private void SetGameUIActive(bool active)
+        {
+            if (gameUICanvas != null)
+                gameUICanvas.SetActive(active);
         }
     }
 }
