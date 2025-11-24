@@ -1,21 +1,13 @@
 using Unity.Netcode;
 using UnityEngine;
-using VeilOfColours.General;
 
-namespace VeilOfColours.Network
+namespace VeilOfColours.UI
 {
-    /// <summary>
-    /// Manages GUI visibility during gameplay.
-    /// </summary>
     public class GUIManager : MonoBehaviour
     {
         [Header("UI References")]
         [SerializeField]
-        private GameObject networkUICanvas;
-
-        [Header("Manager References")]
-        [SerializeField]
-        private LevelManager levelManager;
+        private GameObject gameUICanvas;
 
         private void Start()
         {
@@ -47,29 +39,28 @@ namespace VeilOfColours.Network
 
         private void OnServerStarted()
         {
-            HideNetworkUI();
+            ShowGameUI();
         }
 
         private void OnClientConnected(ulong clientId)
         {
-            HideNetworkUI();
+            ShowGameUI();
         }
 
-        private void HideNetworkUI()
+        private void ShowGameUI()
         {
-            SetNetworkUIActive(false);
-            levelManager?.DisableMainCamera();
+            SetGameUIActive(true);
         }
 
-        public void ShowNetworkUI()
+        public void HideGameUI()
         {
-            SetNetworkUIActive(true);
+            SetGameUIActive(false);
         }
 
-        private void SetNetworkUIActive(bool active)
+        private void SetGameUIActive(bool active)
         {
-            if (networkUICanvas != null)
-                networkUICanvas.SetActive(active);
+            if (gameUICanvas != null)
+                gameUICanvas.SetActive(active);
         }
     }
 }

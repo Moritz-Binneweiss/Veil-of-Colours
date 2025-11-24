@@ -19,7 +19,6 @@
 - Farbwechsel Mechanic
 - Jump and Run Movement
 
-
 ## **Technische Details**
 
 - Aseprite
@@ -38,6 +37,7 @@ Besprechung:
 - Herausforderungen besprochen
 
 Ziel:
+
 - erster Networking Protoyp
 - Projekt genauer ausarbeiten
 
@@ -48,6 +48,7 @@ Besprechung:
 - Basic Networking Test Prototype gezeigt
 
 Ziel:
+
 - Networking Prototype ausarbeiten
 - Basic Player Movement und Animation erweitern
 - Tilesets anschauen und einarbeiten

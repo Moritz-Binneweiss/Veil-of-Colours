@@ -5,7 +5,7 @@ using UnityEngine.InputSystem;
 namespace VeilOfColours.Players
 {
     [RequireComponent(typeof(Rigidbody2D))]
-    public class SimplePlayer2D : NetworkBehaviour
+    public class PlayerMovement : NetworkBehaviour
     {
         private const float GamepadDeadZone = 0.1f;
         private const float WalkingThreshold = 0.01f;
