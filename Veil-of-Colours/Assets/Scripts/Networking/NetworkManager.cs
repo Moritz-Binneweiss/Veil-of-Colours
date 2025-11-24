@@ -140,7 +140,8 @@ namespace VeilOfColours.Networking
 
         private void SpawnPlayersDelayed()
         {
-            SpawnPlayersServerRpc();
+            // Only spawn PlayerTwo, PlayerOne already exists from solo spawn
+            SpawnPlayerTwoServerRpc();
         }
 
         private void OnClientDisconnected(ulong clientId)
@@ -180,12 +181,12 @@ namespace VeilOfColours.Networking
         }
 
         [Rpc(SendTo.Server)]
-        private void SpawnPlayersServerRpc()
+        private void SpawnPlayerTwoServerRpc()
         {
             if (!NetworkManager.Singleton.IsServer)
                 return;
 
-            // Get connected client IDs
+            // Get the second client (not the host)
             ulong hostClientId = NetworkManager.Singleton.LocalClientId;
             ulong clientClientId = 0;
 
@@ -198,10 +199,9 @@ namespace VeilOfColours.Networking
                 }
             }
 
-            // Spawn PlayerOne for host at Spawn_A
-            SpawnPlayerAtLocation("Spawn_A", playerOnePrefab, hostClientId);
-
-            // Spawn PlayerTwo for client at Spawn_B
+            // Only spawn PlayerTwo for the second client at Spawn_B
+            // PlayerOne already exists from solo spawn
+            Debug.Log($"Spawning PlayerTwo for client {clientClientId}...");
             SpawnPlayerAtLocation("Spawn_B", playerTwoPrefab, clientClientId);
         }
 
