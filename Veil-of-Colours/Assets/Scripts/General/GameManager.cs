@@ -27,15 +27,9 @@ namespace VeilOfColours.General
 
         private void Start()
         {
-            SetupLevels();
+            // Levels are active by default in scene
+            // They will be visible immediately for testing
             SubscribeToNetworkEvents();
-        }
-
-        private void SetupLevels()
-        {
-            // Initially disable both levels until players spawn
-            DisableLevelA();
-            DisableLevelB();
         }
 
         private void SubscribeToNetworkEvents()
@@ -48,13 +42,11 @@ namespace VeilOfColours.General
 
         private void OnClientConnected(ulong clientId)
         {
-            // Enable levels when players connect
+            // Make sure levels are enabled when players connect
             if (NetworkManager.Singleton.IsServer)
             {
-                if (NetworkManager.Singleton.ConnectedClients.Count >= 2)
-                {
-                    EnableAllLevels();
-                }
+                Debug.Log($"GameManager: Client {clientId} connected, ensuring levels are active");
+                EnableAllLevels();
             }
         }
 

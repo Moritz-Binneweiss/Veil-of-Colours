@@ -73,10 +73,14 @@ namespace VeilOfColours.Networking
                 UpdateStatus("Creating Relay allocation...");
 
                 // Create Relay allocation
-                Allocation allocation = await RelayService.Instance.CreateAllocationAsync(MaxPlayers);
+                Allocation allocation = await RelayService.Instance.CreateAllocationAsync(
+                    MaxPlayers
+                );
 
                 // Get join code
-                currentJoinCode = await RelayService.Instance.GetJoinCodeAsync(allocation.AllocationId);
+                currentJoinCode = await RelayService.Instance.GetJoinCodeAsync(
+                    allocation.AllocationId
+                );
                 Debug.Log($"Join Code: {currentJoinCode}");
 
                 UpdateStatus($"Host started with Join Code: {currentJoinCode}");
@@ -130,7 +134,9 @@ namespace VeilOfColours.Networking
                 UpdateStatus($"Joining with code: {joinCode}...");
 
                 // Join allocation
-                JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(joinCode);
+                JoinAllocation allocation = await RelayService.Instance.JoinAllocationAsync(
+                    joinCode
+                );
 
                 // Configure Unity Transport
                 var transport = NetworkManager.Singleton.GetComponent<UnityTransport>();

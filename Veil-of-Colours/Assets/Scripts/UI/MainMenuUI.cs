@@ -89,7 +89,7 @@ namespace VeilOfColours.UI
             if (!string.IsNullOrEmpty(joinCode))
             {
                 UpdateStatus($"Game created! Code: {joinCode}");
-                // UI will be hidden by GUIManager when connection is established
+                HideMenuPanel();
             }
             else
             {
@@ -123,7 +123,19 @@ namespace VeilOfColours.UI
                 UpdateStatus("Failed to join. Check code and try again.");
                 SetButtonsInteractable(true);
             }
-            // UI will be hidden by GUIManager when connection is established
+            else
+            {
+                HideMenuPanel();
+            }
+        }
+
+        private void HideMenuPanel()
+        {
+            if (menuPanel != null)
+            {
+                menuPanel.SetActive(false);
+                Debug.Log("[MainMenuUI] Menu panel hidden");
+            }
         }
 
         private void UpdateStatus(string message)

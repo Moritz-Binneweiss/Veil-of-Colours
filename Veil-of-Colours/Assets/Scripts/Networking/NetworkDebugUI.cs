@@ -45,7 +45,7 @@ namespace VeilOfColours.Networking
             {
                 fontSize = 16,
                 fontStyle = FontStyle.Bold,
-                normal = { textColor = Color.white }
+                normal = { textColor = Color.white },
             };
 
             initialized = true;
