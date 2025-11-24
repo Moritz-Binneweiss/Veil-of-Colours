@@ -22,22 +22,13 @@ namespace VeilOfColours.Players
 
             if (IsOwner)
             {
-                Debug.Log($"{playerName} spawned and controlled by this client");
                 SetupPlayerLevel();
-            }
-            else
-            {
-                Debug.Log($"{playerName} spawned but controlled by another client");
             }
         }
 
         private void SetupPlayerLevel()
         {
-            // Additional setup for the player's assigned level can be done here
-            if (targetLevel != null)
-            {
-                Debug.Log($"{playerName} assigned to level: {targetLevel.name}");
-            }
+            // Additional player setup can be done here
         }
 
         public string GetPlayerName()

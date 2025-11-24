@@ -77,9 +77,6 @@ namespace VeilOfColours.Networking
 
         private void OnServerStarted()
         {
-            Debug.Log("Server started");
-
-            // Subscribe to scene events when network is ready
             if (NetworkManager.Singleton.SceneManager != null)
             {
                 NetworkManager.Singleton.SceneManager.OnLoadEventCompleted += OnSceneLoadCompleted;
@@ -93,17 +90,12 @@ namespace VeilOfColours.Networking
 
         private void OnClientConnected(ulong clientId)
         {
-            Debug.Log(
-                $"Client {clientId} connected. Total clients: {NetworkManager.Singleton.ConnectedClients.Count}"
-            );
-
-            // Spawn players when second client joins
+            // Spawn second player when they join
             if (
                 NetworkManager.Singleton.IsServer
                 && NetworkManager.Singleton.ConnectedClients.Count == 2
             )
             {
-                Debug.Log("Second player connected, spawning both players...");
                 Invoke(nameof(SpawnPlayersDelayed), 0.5f);
             }
         }
@@ -115,14 +107,11 @@ namespace VeilOfColours.Networking
             System.Collections.Generic.List<ulong> clientsTimedOut
         )
         {
-            Debug.Log($"Scene {sceneName} loaded for {clientsCompleted.Count} clients");
-
-            // If this is the game scene and we're the server with only 1 client (solo host), spawn host player
+            // Spawn solo host player if no one else has joined yet
             if (sceneName == gameScene && NetworkManager.Singleton.IsServer)
             {
                 if (NetworkManager.Singleton.ConnectedClients.Count == 1)
                 {
-                    Debug.Log("Solo host detected, spawning host player only...");
                     Invoke(nameof(SpawnHostPlayerOnly), 0.5f);
                 }
             }
@@ -134,19 +123,17 @@ namespace VeilOfColours.Networking
                 return;
 
             ulong hostClientId = NetworkManager.Singleton.LocalClientId;
-            Debug.Log($"Spawning solo host player (Client {hostClientId})...");
             SpawnPlayerAtLocation("Spawn_A", playerOnePrefab, hostClientId);
         }
 
         private void SpawnPlayersDelayed()
         {
-            // Only spawn PlayerTwo, PlayerOne already exists from solo spawn
             SpawnPlayerTwoServerRpc();
         }
 
         private void OnClientDisconnected(ulong clientId)
         {
-            Debug.Log($"Client {clientId} disconnected");
+            // Handle disconnections if needed
         }
 
         private void LoadGameSceneNetwork()
@@ -163,7 +150,6 @@ namespace VeilOfColours.Networking
                 return;
             }
 
-            Debug.Log($"Loading scene: {gameScene}");
             var status = NetworkManager.Singleton.SceneManager.LoadScene(
                 gameScene,
                 LoadSceneMode.Single
@@ -171,12 +157,7 @@ namespace VeilOfColours.Networking
 
             if (status != SceneEventProgressStatus.Started)
             {
-                Debug.LogError($"Failed to load scene! Status: {status}");
-            }
-            else
-            {
-                Debug.Log("Scene load started successfully");
-                // Spawning handled by OnSceneLoadCompleted event
+                Debug.LogError($"Failed to load scene: {status}");
             }
         }
 
@@ -186,7 +167,6 @@ namespace VeilOfColours.Networking
             if (!NetworkManager.Singleton.IsServer)
                 return;
 
-            // Get the second client (not the host)
             ulong hostClientId = NetworkManager.Singleton.LocalClientId;
             ulong clientClientId = 0;
 
@@ -199,9 +179,6 @@ namespace VeilOfColours.Networking
                 }
             }
 
-            // Only spawn PlayerTwo for the second client at Spawn_B
-            // PlayerOne already exists from solo spawn
-            Debug.Log($"Spawning PlayerTwo for client {clientClientId}...");
             SpawnPlayerAtLocation("Spawn_B", playerTwoPrefab, clientClientId);
         }
 
@@ -231,11 +208,10 @@ namespace VeilOfColours.Networking
             if (networkObject != null)
             {
                 networkObject.SpawnAsPlayerObject(clientId);
-                Debug.Log($"Spawned player for client {clientId} at {spawnTag}");
             }
             else
             {
-                Debug.LogError($"NetworkObject component not found on player prefab");
+                Debug.LogError("NetworkObject missing on player prefab");
                 Destroy(playerInstance);
             }
         }

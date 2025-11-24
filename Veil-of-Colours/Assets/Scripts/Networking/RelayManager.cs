@@ -41,7 +41,6 @@ namespace VeilOfColours.Networking
             {
                 if (UnityServices.State == ServicesInitializationState.Initialized)
                 {
-                    Debug.Log("Unity Services already initialized");
                     return true;
                 }
 
@@ -52,7 +51,6 @@ namespace VeilOfColours.Networking
                 {
                     UpdateStatus("Signing in anonymously...");
                     await AuthenticationService.Instance.SignInAnonymouslyAsync();
-                    Debug.Log($"Player ID: {AuthenticationService.Instance.PlayerId}");
                 }
 
                 UpdateStatus("Unity Services initialized successfully");
@@ -81,7 +79,6 @@ namespace VeilOfColours.Networking
                 currentJoinCode = await RelayService.Instance.GetJoinCodeAsync(
                     allocation.AllocationId
                 );
-                Debug.Log($"Join Code: {currentJoinCode}");
 
                 UpdateStatus($"Host started with Join Code: {currentJoinCode}");
 
@@ -181,7 +178,6 @@ namespace VeilOfColours.Networking
 
         private void UpdateStatus(string message)
         {
-            Debug.Log($"[RelayManager] {message}");
             OnConnectionStatusChanged?.Invoke(message);
         }
 

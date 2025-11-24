@@ -134,7 +134,6 @@ namespace VeilOfColours.UI
             if (menuPanel != null)
             {
                 menuPanel.SetActive(false);
-                Debug.Log("[MainMenuUI] Menu panel hidden");
             }
         }
 
@@ -142,8 +141,6 @@ namespace VeilOfColours.UI
         {
             if (statusText != null)
                 statusText.text = message;
-
-            Debug.Log($"[MainMenuUI] {message}");
         }
 
         private void SetButtonsInteractable(bool interactable)
