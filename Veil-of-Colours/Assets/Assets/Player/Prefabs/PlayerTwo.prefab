@@ -635,14 +635,24 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VeilOfColours.Network.SimplePlayer2D
   ShowTopMostFoldoutHeaderGroup: 1
-  moveSpeed: 5
-  jumpForce: 10
-  groundCheck: {fileID: 5189023657513006131}
-  groundCheckRadius: 0.2
+  maxSpeed: 9
+  acceleration: 50
+  deceleration: 60
+  airAcceleration: 30
+  airDeceleration: 30
+  jumpForce: 16
+  jumpCutMultiplier: 0.75
+  coyoteTime: 0.15
+  jumpBufferTime: 0.15
+  fallMultiplier: 2.5
+  lowJumpMultiplier: 2
+  maxFallSpeed: 20
+  groundCheck: {fileID: 5189023657513006131, guid: 7681c4879e0f8ff4eb89506e6a2a756f, type: 3}
+  groundCheckRadius: 0.3
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  playerCamera: {fileID: 2769143714376100532}
+  playerCamera: {fileID: 2769143714376100532, guid: 7681c4879e0f8ff4eb89506e6a2a756f, type: 3}
 --- !u!114 &3044659649591904390
 MonoBehaviour:
   m_ObjectHideFlags: 0

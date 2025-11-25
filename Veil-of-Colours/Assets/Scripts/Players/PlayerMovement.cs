@@ -12,10 +12,42 @@ namespace VeilOfColours.Players
 
         [Header("Movement Settings")]
         [SerializeField]
-        private float moveSpeed = 5f;
+        private float maxSpeed = 7f;
 
         [SerializeField]
-        private float jumpForce = 10f;
+        private float acceleration = 50f;
+
+        [SerializeField]
+        private float deceleration = 60f;
+
+        [SerializeField]
+        private float airAcceleration = 30f;
+
+        [SerializeField]
+        private float airDeceleration = 30f;
+
+        [Header("Jump Settings")]
+        [SerializeField]
+        private float jumpForce = 15f;
+
+        [SerializeField]
+        private float jumpCutMultiplier = 0.5f;
+
+        [SerializeField]
+        private float coyoteTime = 0.15f;
+
+        [SerializeField]
+        private float jumpBufferTime = 0.15f;
+
+        [Header("Gravity Settings")]
+        [SerializeField]
+        private float fallMultiplier = 2.5f;
+
+        [SerializeField]
+        private float lowJumpMultiplier = 2f;
+
+        [SerializeField]
+        private float maxFallSpeed = 20f;
 
         [Header("Ground Check")]
         [SerializeField]
@@ -34,7 +66,15 @@ namespace VeilOfColours.Players
         private Rigidbody2D rb;
         private Animator animator;
         private bool isGrounded;
+        private bool wasGrounded;
         private Vector2 moveInput;
+
+        private float coyoteTimeCounter;
+
+        private float jumpBufferCounter;
+
+        private bool isJumping;
+        private bool jumpReleased = true;
 
         private void Awake()
         {
@@ -49,6 +89,7 @@ namespace VeilOfColours.Players
                 return;
 
             ReadInput();
+            UpdateTimers();
         }
 
         private void ReadInput()
@@ -59,8 +100,17 @@ namespace VeilOfColours.Players
             {
                 moveInput.x = GetKeyboardInput();
 
-                if (Keyboard.current.spaceKey.wasPressedThisFrame && isGrounded)
-                    Jump();
+                // Jump buffer - register jump input even if not grounded yet
+                if (Keyboard.current.spaceKey.wasPressedThisFrame)
+                {
+                    jumpBufferCounter = jumpBufferTime;
+                }
+
+                // Track jump release for variable jump height
+                if (Keyboard.current.spaceKey.wasReleasedThisFrame)
+                {
+                    jumpReleased = true;
+                }
             }
 
             if (Gamepad.current != null)
@@ -69,8 +119,15 @@ namespace VeilOfColours.Players
                 if (Mathf.Abs(stickInput.x) > GamepadDeadZone)
                     moveInput.x = stickInput.x;
 
-                if (Gamepad.current.buttonSouth.wasPressedThisFrame && isGrounded)
-                    Jump();
+                if (Gamepad.current.buttonSouth.wasPressedThisFrame)
+                {
+                    jumpBufferCounter = jumpBufferTime;
+                }
+
+                if (Gamepad.current.buttonSouth.wasReleasedThisFrame)
+                {
+                    jumpReleased = true;
+                }
             }
         }
 
@@ -88,13 +145,32 @@ namespace VeilOfColours.Players
             return 0f;
         }
 
+        private void UpdateTimers()
+        {
+            // Coyote time - grace period after leaving ground
+            if (isGrounded)
+            {
+                coyoteTimeCounter = coyoteTime;
+            }
+            else
+            {
+                coyoteTimeCounter -= Time.deltaTime;
+            }
+
+            // Jump buffer countdown
+            jumpBufferCounter -= Time.deltaTime;
+        }
+
         private void FixedUpdate()
         {
             if (!IsOwner)
                 return;
 
+            wasGrounded = isGrounded;
             CheckGroundState();
+            HandleJump();
             ApplyMovement();
+            ApplyGravityModifiers();
             UpdateAnimation();
         }
 
@@ -105,11 +181,82 @@ namespace VeilOfColours.Players
                 groundCheckRadius,
                 groundLayer
             );
+
+            // Reset jump state when landing
+            if (!wasGrounded && isGrounded)
+            {
+                isJumping = false;
+                jumpReleased = true;
+            }
+        }
+
+        private void HandleJump()
+        {
+            // Jump if: has jump buffered AND (grounded OR within coyote time)
+            if (jumpBufferCounter > 0f && coyoteTimeCounter > 0f && !isJumping)
+            {
+                Jump();
+                jumpBufferCounter = 0f;
+                coyoteTimeCounter = 0f;
+            }
+
+            // Variable jump height - cut jump short when button released
+            if (jumpReleased && rb.linearVelocity.y > 0f && isJumping)
+            {
+                rb.linearVelocity = new Vector2(
+                    rb.linearVelocity.x,
+                    rb.linearVelocity.y * jumpCutMultiplier
+                );
+            }
         }
 
         private void ApplyMovement()
         {
-            rb.linearVelocity = new Vector2(moveInput.x * moveSpeed, rb.linearVelocity.y);
+            float targetSpeed = moveInput.x * maxSpeed;
+            float currentSpeed = rb.linearVelocity.x;
+
+            // Choose acceleration/deceleration based on ground state
+            float accelRate;
+            if (Mathf.Abs(moveInput.x) > 0.01f)
+            {
+                accelRate = isGrounded ? acceleration : airAcceleration;
+            }
+            else
+            {
+                accelRate = isGrounded ? deceleration : airDeceleration;
+            }
+
+            // Smooth acceleration instead of instant speed
+            float speedDiff = targetSpeed - currentSpeed;
+            float movement = speedDiff * accelRate * Time.fixedDeltaTime;
+
+            rb.linearVelocity = new Vector2(currentSpeed + movement, rb.linearVelocity.y);
+        }
+
+        private void ApplyGravityModifiers()
+        {
+            // Apply different gravity when falling vs rising for better feel
+            if (rb.linearVelocity.y < 0)
+            {
+                // Falling - stronger gravity for snappier feel
+                rb.linearVelocity +=
+                    Vector2.up * Physics2D.gravity.y * (fallMultiplier - 1) * Time.fixedDeltaTime;
+            }
+            else if (rb.linearVelocity.y > 0 && jumpReleased)
+            {
+                // Rising but jump released - moderate gravity for low jump
+                rb.linearVelocity +=
+                    Vector2.up
+                    * Physics2D.gravity.y
+                    * (lowJumpMultiplier - 1)
+                    * Time.fixedDeltaTime;
+            }
+
+            // Clamp fall speed
+            if (rb.linearVelocity.y < -maxFallSpeed)
+            {
+                rb.linearVelocity = new Vector2(rb.linearVelocity.x, -maxFallSpeed);
+            }
         }
 
         private void UpdateAnimation()
@@ -117,13 +264,15 @@ namespace VeilOfColours.Players
             if (animator == null)
                 return;
 
-            bool isWalking = Mathf.Abs(moveInput.x) > WalkingThreshold;
+            bool isWalking = Mathf.Abs(rb.linearVelocity.x) > WalkingThreshold;
             animator.SetBool("isWalking", isWalking);
         }
 
         private void Jump()
         {
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            isJumping = true;
+            jumpReleased = false;
         }
 
         // Visualize ground check in editor
