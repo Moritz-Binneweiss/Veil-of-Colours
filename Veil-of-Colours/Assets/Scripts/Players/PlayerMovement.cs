@@ -39,6 +39,19 @@ namespace VeilOfColours.Players
         [SerializeField]
         private float jumpBufferTime = 0.15f;
 
+        [Header("Dash Settings")]
+        [SerializeField]
+        private float dashSpeed = 20f;
+
+        [SerializeField]
+        private float dashDuration = 0.15f;
+
+        [SerializeField]
+        private float dashCooldown = 0.8f;
+
+        [SerializeField]
+        private bool dashResetOnGround = true;
+
         [Header("Gravity Settings")]
         [SerializeField]
         private float fallMultiplier = 2.5f;
@@ -76,6 +89,14 @@ namespace VeilOfColours.Players
         private bool isJumping;
         private bool jumpReleased = true;
 
+        // Dash state
+        private bool isDashing;
+        private bool canDash = true;
+        private bool hasAirDash = true; // Track if air dash is available
+        private float dashTimeLeft;
+        private float dashCooldownTimer;
+        private Vector2 dashDirection;
+
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
@@ -100,16 +121,26 @@ namespace VeilOfColours.Players
             {
                 moveInput.x = GetKeyboardInput();
 
-                // Jump buffer - register jump input even if not grounded yet
+                // Jump buffer
                 if (Keyboard.current.spaceKey.wasPressedThisFrame)
                 {
                     jumpBufferCounter = jumpBufferTime;
                 }
 
-                // Track jump release for variable jump height
                 if (Keyboard.current.spaceKey.wasReleasedThisFrame)
                 {
                     jumpReleased = true;
+                }
+
+                // Dash input (Left Shift or X key)
+                if (
+                    (
+                        Keyboard.current.leftShiftKey.wasPressedThisFrame
+                        || Keyboard.current.xKey.wasPressedThisFrame
+                    ) && canDash
+                )
+                {
+                    StartDash();
                 }
             }
 
@@ -127,6 +158,17 @@ namespace VeilOfColours.Players
                 if (Gamepad.current.buttonSouth.wasReleasedThisFrame)
                 {
                     jumpReleased = true;
+                }
+
+                // Dash input (Right Bumper or X button)
+                if (
+                    (
+                        Gamepad.current.rightShoulder.wasPressedThisFrame
+                        || Gamepad.current.buttonWest.wasPressedThisFrame
+                    ) && canDash
+                )
+                {
+                    StartDash();
                 }
             }
         }
@@ -147,7 +189,7 @@ namespace VeilOfColours.Players
 
         private void UpdateTimers()
         {
-            // Coyote time - grace period after leaving ground
+            // Coyote time
             if (isGrounded)
             {
                 coyoteTimeCounter = coyoteTime;
@@ -157,8 +199,18 @@ namespace VeilOfColours.Players
                 coyoteTimeCounter -= Time.deltaTime;
             }
 
-            // Jump buffer countdown
+            // Jump buffer
             jumpBufferCounter -= Time.deltaTime;
+
+            // Dash cooldown
+            if (dashCooldownTimer > 0)
+            {
+                dashCooldownTimer -= Time.deltaTime;
+                if (dashCooldownTimer <= 0)
+                {
+                    canDash = true;
+                }
+            }
         }
 
         private void FixedUpdate()
@@ -168,9 +220,18 @@ namespace VeilOfColours.Players
 
             wasGrounded = isGrounded;
             CheckGroundState();
-            HandleJump();
-            ApplyMovement();
-            ApplyGravityModifiers();
+
+            if (isDashing)
+            {
+                HandleDash();
+            }
+            else
+            {
+                HandleJump();
+                ApplyMovement();
+                ApplyGravityModifiers();
+            }
+
             UpdateAnimation();
         }
 
@@ -187,6 +248,12 @@ namespace VeilOfColours.Players
             {
                 isJumping = false;
                 jumpReleased = true;
+
+                // Reset air dash when landing
+                if (dashResetOnGround)
+                {
+                    hasAirDash = true;
+                }
             }
         }
 
@@ -273,6 +340,76 @@ namespace VeilOfColours.Players
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isJumping = true;
             jumpReleased = false;
+        }
+
+        private void StartDash()
+        {
+            // Can only dash if: cooldown is done AND (grounded OR has air dash)
+            bool canDashNow = canDash && (isGrounded || hasAirDash);
+            if (!canDashNow || isDashing)
+                return;
+
+            // Get dash direction based on input
+            Vector2 inputDirection = Vector2.zero;
+
+            if (Keyboard.current != null)
+            {
+                if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)
+                    inputDirection.y = 1;
+                if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)
+                    inputDirection.y = -1;
+                if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
+                    inputDirection.x = -1;
+                if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
+                    inputDirection.x = 1;
+            }
+
+            if (Gamepad.current != null)
+            {
+                Vector2 stick = Gamepad.current.leftStick.ReadValue();
+                if (Mathf.Abs(stick.x) > GamepadDeadZone || Mathf.Abs(stick.y) > GamepadDeadZone)
+                {
+                    inputDirection = stick;
+                }
+            }
+
+            // Default to horizontal dash if no input
+            if (inputDirection.magnitude < 0.1f)
+            {
+                // Dash in the direction player is facing (use last movement or default right)
+                inputDirection.x = moveInput.x != 0 ? Mathf.Sign(moveInput.x) : 1f;
+            }
+
+            dashDirection = inputDirection.normalized;
+            isDashing = true;
+            dashTimeLeft = dashDuration;
+            canDash = false;
+            dashCooldownTimer = dashCooldown;
+
+            // Use up air dash if in air
+            if (!isGrounded)
+            {
+                hasAirDash = false;
+            }
+
+            // Cancel current velocity for clean dash
+            rb.linearVelocity = Vector2.zero;
+        }
+
+        private void HandleDash()
+        {
+            dashTimeLeft -= Time.fixedDeltaTime;
+
+            if (dashTimeLeft <= 0)
+            {
+                isDashing = false;
+                // Small velocity preservation at end of dash
+                rb.linearVelocity = dashDirection * dashSpeed * 0.3f;
+                return;
+            }
+
+            // Apply dash velocity (ignore gravity during dash)
+            rb.linearVelocity = dashDirection * dashSpeed;
         }
 
         // Visualize ground check in editor

@@ -73,11 +73,11 @@ namespace VeilOfColours.UI
 
                 if (connectedPlayers >= 2)
                 {
-                    UpdateCodeText("Both players connected!");
+                    UpdateCodeText("");
                 }
                 else if (!string.IsNullOrEmpty(currentCode))
                 {
-                    UpdateCodeText($"Join Code: {currentCode}\nWaiting for player 2...");
+                    UpdateCodeText($"Join Code: {currentCode}");
                 }
             }
         }
@@ -88,7 +88,7 @@ namespace VeilOfColours.UI
                 return;
 
             ShowCodeDisplay();
-            UpdateCodeText($"Join Code: {joinCode}\nShare this with Player 2!");
+            UpdateCodeText($"Join Code: {joinCode}");
         }
 
         private void UpdateCodeText(string text)
