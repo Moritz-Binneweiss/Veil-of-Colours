@@ -10,6 +10,19 @@ namespace VeilOfColours.Players
         private const float GamepadDeadZone = 0.1f;
         private const float WalkingThreshold = 0.01f;
 
+        [Header("Input Actions")]
+        [SerializeField]
+        private InputActionReference moveAction;
+
+        [SerializeField]
+        private InputActionReference jumpAction;
+
+        [SerializeField]
+        private InputActionReference dashAction;
+
+        [SerializeField]
+        private InputActionReference climbAction;
+
         [Header("Movement Settings")]
         [SerializeField]
         private float maxSpeed = 7f;
@@ -52,6 +65,22 @@ namespace VeilOfColours.Players
         [SerializeField]
         private bool dashResetOnGround = true;
 
+        [Header("Climb Settings")]
+        [SerializeField]
+        private float climbSpeed = 5f;
+
+        [SerializeField]
+        private float maxClimbStamina = 100f;
+
+        [SerializeField]
+        private float climbStaminaDrainRate = 25f; // Per second
+
+        [SerializeField]
+        private float climbStaminaRegenRate = 50f; // Per second
+
+        [SerializeField]
+        private float climbStaminaRegenDelay = 0.5f; // Delay before instant refill
+
         [Header("Gravity Settings")]
         [SerializeField]
         private float fallMultiplier = 2.5f;
@@ -71,6 +100,13 @@ namespace VeilOfColours.Players
 
         [SerializeField]
         private LayerMask groundLayer;
+
+        [Header("Wall Check")]
+        [SerializeField]
+        private Transform wallCheckFront;
+
+        [SerializeField]
+        private float wallCheckDistance = 0.5f;
 
         [Header("Camera Reference")]
         [SerializeField]
@@ -97,11 +133,44 @@ namespace VeilOfColours.Players
         private float dashCooldownTimer;
         private Vector2 dashDirection;
 
+        // Climb state
+        private bool isClimbing;
+        private bool isTouchingWall;
+        private int wallDirection; // -1 for left, 1 for right
+        private float currentClimbStamina;
+        private bool canRegenClimbStamina;
+        private float climbStaminaRegenTimer;
+
         private void Awake()
         {
             rb = GetComponent<Rigidbody2D>();
             animator = GetComponent<Animator>();
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            currentClimbStamina = maxClimbStamina;
+        }
+
+        private void OnEnable()
+        {
+            if (moveAction != null)
+                moveAction.action.Enable();
+            if (jumpAction != null)
+                jumpAction.action.Enable();
+            if (dashAction != null)
+                dashAction.action.Enable();
+            if (climbAction != null)
+                climbAction.action.Enable();
+        }
+
+        private void OnDisable()
+        {
+            if (moveAction != null)
+                moveAction.action.Disable();
+            if (jumpAction != null)
+                jumpAction.action.Disable();
+            if (dashAction != null)
+                dashAction.action.Disable();
+            if (climbAction != null)
+                climbAction.action.Disable();
         }
 
         private void Update()
@@ -115,76 +184,39 @@ namespace VeilOfColours.Players
 
         private void ReadInput()
         {
-            moveInput = Vector2.zero;
-
-            if (Keyboard.current != null)
+            // Read movement from Input Action
+            if (moveAction != null)
             {
-                moveInput.x = GetKeyboardInput();
-
-                // Jump buffer
-                if (Keyboard.current.spaceKey.wasPressedThisFrame)
-                {
-                    jumpBufferCounter = jumpBufferTime;
-                }
-
-                if (Keyboard.current.spaceKey.wasReleasedThisFrame)
-                {
-                    jumpReleased = true;
-                }
-
-                // Dash input (Left Shift or X key)
-                if (
-                    (
-                        Keyboard.current.leftShiftKey.wasPressedThisFrame
-                        || Keyboard.current.xKey.wasPressedThisFrame
-                    ) && canDash
-                )
-                {
-                    StartDash();
-                }
+                Vector2 move = moveAction.action.ReadValue<Vector2>();
+                moveInput = new Vector2(move.x, 0);
+            }
+            else
+            {
+                moveInput = Vector2.zero;
             }
 
-            if (Gamepad.current != null)
+            // Jump buffer
+            if (jumpAction != null && jumpAction.action.WasPressedThisFrame())
             {
-                Vector2 stickInput = Gamepad.current.leftStick.ReadValue();
-                if (Mathf.Abs(stickInput.x) > GamepadDeadZone)
-                    moveInput.x = stickInput.x;
-
-                if (Gamepad.current.buttonSouth.wasPressedThisFrame)
-                {
-                    jumpBufferCounter = jumpBufferTime;
-                }
-
-                if (Gamepad.current.buttonSouth.wasReleasedThisFrame)
-                {
-                    jumpReleased = true;
-                }
-
-                // Dash input (Right Bumper or X button)
-                if (
-                    (
-                        Gamepad.current.rightShoulder.wasPressedThisFrame
-                        || Gamepad.current.buttonWest.wasPressedThisFrame
-                    ) && canDash
-                )
-                {
-                    StartDash();
-                }
+                jumpBufferCounter = jumpBufferTime;
             }
-        }
 
-        private float GetKeyboardInput()
-        {
-            bool leftPressed =
-                Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed;
-            bool rightPressed =
-                Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed;
+            if (jumpAction != null && jumpAction.action.WasReleasedThisFrame())
+            {
+                jumpReleased = true;
+            }
 
-            if (leftPressed && !rightPressed)
-                return -1f;
-            if (rightPressed && !leftPressed)
-                return 1f;
-            return 0f;
+            // Dash input
+            if (dashAction != null && dashAction.action.WasPressedThisFrame() && canDash)
+            {
+                StartDash();
+            }
+
+            // Climb input
+            if (climbAction != null && climbAction.action.IsPressed())
+            {
+                TryStartClimb();
+            }
         }
 
         private void UpdateTimers()
@@ -211,6 +243,17 @@ namespace VeilOfColours.Players
                     canDash = true;
                 }
             }
+
+            // Climb stamina regeneration (instant refill after delay when grounded)
+            if (canRegenClimbStamina && isGrounded)
+            {
+                climbStaminaRegenTimer -= Time.deltaTime;
+                if (climbStaminaRegenTimer <= 0)
+                {
+                    currentClimbStamina = maxClimbStamina; // Instant refill
+                    canRegenClimbStamina = false; // Stop checking
+                }
+            }
         }
 
         private void FixedUpdate()
@@ -224,6 +267,10 @@ namespace VeilOfColours.Players
             if (isDashing)
             {
                 HandleDash();
+            }
+            else if (isClimbing)
+            {
+                HandleClimb();
             }
             else
             {
@@ -243,6 +290,19 @@ namespace VeilOfColours.Players
                 groundLayer
             );
 
+            // Check for walls (uses same layer as ground since tilemap is both)
+            if (wallCheckFront != null)
+            {
+                RaycastHit2D hit = Physics2D.Raycast(
+                    wallCheckFront.position,
+                    Vector2.right * Mathf.Sign(transform.localScale.x),
+                    wallCheckDistance,
+                    groundLayer
+                );
+                isTouchingWall = hit.collider != null;
+                wallDirection = (int)Mathf.Sign(transform.localScale.x);
+            }
+
             // Reset jump state when landing
             if (!wasGrounded && isGrounded)
             {
@@ -254,6 +314,13 @@ namespace VeilOfColours.Players
                 {
                     hasAirDash = true;
                 }
+
+                // Stop climbing when landing
+                isClimbing = false;
+
+                // Start climb stamina regeneration timer when landing
+                canRegenClimbStamina = true;
+                climbStaminaRegenTimer = climbStaminaRegenDelay;
             }
         }
 
@@ -349,28 +416,11 @@ namespace VeilOfColours.Players
             if (!canDashNow || isDashing)
                 return;
 
-            // Get dash direction based on input
+            // Get dash direction from move input
             Vector2 inputDirection = Vector2.zero;
-
-            if (Keyboard.current != null)
+            if (moveAction != null)
             {
-                if (Keyboard.current.wKey.isPressed || Keyboard.current.upArrowKey.isPressed)
-                    inputDirection.y = 1;
-                if (Keyboard.current.sKey.isPressed || Keyboard.current.downArrowKey.isPressed)
-                    inputDirection.y = -1;
-                if (Keyboard.current.aKey.isPressed || Keyboard.current.leftArrowKey.isPressed)
-                    inputDirection.x = -1;
-                if (Keyboard.current.dKey.isPressed || Keyboard.current.rightArrowKey.isPressed)
-                    inputDirection.x = 1;
-            }
-
-            if (Gamepad.current != null)
-            {
-                Vector2 stick = Gamepad.current.leftStick.ReadValue();
-                if (Mathf.Abs(stick.x) > GamepadDeadZone || Mathf.Abs(stick.y) > GamepadDeadZone)
-                {
-                    inputDirection = stick;
-                }
+                inputDirection = moveAction.action.ReadValue<Vector2>();
             }
 
             // Default to horizontal dash if no input
@@ -412,6 +462,54 @@ namespace VeilOfColours.Players
             rb.linearVelocity = dashDirection * dashSpeed;
         }
 
+        private void TryStartClimb()
+        {
+            // Can only climb if touching wall and has stamina
+            if (isTouchingWall && !isGrounded && currentClimbStamina > 0)
+            {
+                isClimbing = true;
+                isDashing = false; // Cancel dash if climbing
+                canRegenClimbStamina = false; // Stop regen while climbing
+            }
+        }
+
+        private void HandleClimb()
+        {
+            // Drain stamina
+            currentClimbStamina -= climbStaminaDrainRate * Time.fixedDeltaTime;
+
+            // Stop climbing if out of stamina or no longer touching wall
+            if (currentClimbStamina <= 0 || !isTouchingWall)
+            {
+                isClimbing = false;
+                currentClimbStamina = Mathf.Max(currentClimbStamina, 0);
+                return;
+            }
+
+            // Check if climb button is released
+            bool climbHeld = climbAction != null && climbAction.action.IsPressed();
+
+            if (!climbHeld)
+            {
+                isClimbing = false;
+                return;
+            }
+
+            // Get vertical input from move action
+            float verticalInput = 0f;
+            if (moveAction != null)
+            {
+                Vector2 move = moveAction.action.ReadValue<Vector2>();
+                verticalInput = move.y;
+            }
+
+            // Apply climb velocity (very little gravity, stick to wall)
+            rb.linearVelocity = new Vector2(0, verticalInput * climbSpeed);
+
+            // Reset air dash while climbing
+            hasAirDash = true;
+        }
+
         // Visualize ground check in editor
         private void OnDrawGizmosSelected()
         {
@@ -419,6 +517,13 @@ namespace VeilOfColours.Players
             {
                 Gizmos.color = isGrounded ? Color.green : Color.red;
                 Gizmos.DrawWireSphere(groundCheck.position, groundCheckRadius);
+            }
+
+            if (wallCheckFront != null)
+            {
+                Gizmos.color = isTouchingWall ? Color.blue : Color.yellow;
+                Vector3 direction = Vector3.right * Mathf.Sign(transform.localScale.x);
+                Gizmos.DrawRay(wallCheckFront.position, direction * wallCheckDistance);
             }
         }
 
@@ -446,6 +551,12 @@ namespace VeilOfColours.Players
         {
             if (playerCamera != null)
                 playerCamera.enabled = false;
+        }
+
+        // Public getter for UI
+        public float GetCurrentClimbStamina()
+        {
+            return currentClimbStamina;
         }
     }
 }
