@@ -12,14 +12,56 @@ namespace VeilOfColours.UI
         private TextMeshProUGUI codeDisplayText;
 
         [SerializeField]
-        private GameObject codeDisplayPanel;
+        private GameObject panel;
+
+        [SerializeField]
+        private TextMeshProUGUI climbStaminaText;
 
         private RelayManager relayManager;
+        private VeilOfColours.Players.PlayerMovement localPlayer;
 
         private void Start()
         {
             InitializeUI();
             SubscribeToNetworkEvents();
+        }
+
+        private void Update()
+        {
+            UpdateStaminaDisplay();
+        }
+
+        private void UpdateStaminaDisplay()
+        {
+            if (climbStaminaText == null)
+                return;
+
+            // Find local player if not found yet
+            if (localPlayer == null)
+            {
+                var players = FindObjectsByType<VeilOfColours.Players.PlayerMovement>(
+                    FindObjectsSortMode.None
+                );
+                foreach (var player in players)
+                {
+                    if (player.IsOwner)
+                    {
+                        localPlayer = player;
+                        break;
+                    }
+                }
+            }
+
+            // Update climb stamina text
+            if (localPlayer != null)
+            {
+                float stamina = localPlayer.GetCurrentClimbStamina();
+                climbStaminaText.text = $"Climb Stamina: {stamina:F0}";
+            }
+            else
+            {
+                climbStaminaText.text = "Climb Stamina: --";
+            }
         }
 
         private void InitializeUI()
@@ -73,11 +115,11 @@ namespace VeilOfColours.UI
 
                 if (connectedPlayers >= 2)
                 {
-                    UpdateCodeText("Both players connected!");
+                    UpdateCodeText("");
                 }
                 else if (!string.IsNullOrEmpty(currentCode))
                 {
-                    UpdateCodeText($"Join Code: {currentCode}\nWaiting for player 2...");
+                    UpdateCodeText($"Join Code: {currentCode}");
                 }
             }
         }
@@ -88,7 +130,7 @@ namespace VeilOfColours.UI
                 return;
 
             ShowCodeDisplay();
-            UpdateCodeText($"Join Code: {joinCode}\nShare this with Player 2!");
+            UpdateCodeText($"Join Code: {joinCode}");
         }
 
         private void UpdateCodeText(string text)
@@ -99,14 +141,14 @@ namespace VeilOfColours.UI
 
         private void ShowCodeDisplay()
         {
-            if (codeDisplayPanel != null)
-                codeDisplayPanel.SetActive(true);
+            if (panel != null)
+                panel.SetActive(true);
         }
 
         private void HideCodeDisplay()
         {
-            if (codeDisplayPanel != null)
-                codeDisplayPanel.SetActive(false);
+            if (panel != null)
+                panel.SetActive(false);
         }
 
         private void OnDestroy()

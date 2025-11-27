@@ -457,6 +457,37 @@ MonoBehaviour:
     m_VarianceClampScale: 0.9
     m_ContrastAdaptiveSharpening: 0
   m_Version: 2
+--- !u!1 &6505858759606851415
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2997319888424435167}
+  m_Layer: 0
+  m_Name: WallCheckFront
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2997319888424435167
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6505858759606851415}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: 0.25, y: -0.5, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 345845290163259672}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7352237538142526309
 GameObject:
   m_ObjectHideFlags: 0
@@ -482,7 +513,7 @@ Transform:
   m_GameObject: {fileID: 7352237538142526309}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.21, y: -1.6, z: 0}
+  m_LocalPosition: {x: -0.21, y: -1.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -594,6 +625,7 @@ Transform:
   - {fileID: 8362772168149236214}
   - {fileID: 5876217241496827366}
   - {fileID: 1215034140423556604}
+  - {fileID: 2997319888424435167}
   - {fileID: 5189023657513006131}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -609,7 +641,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 2700475106
+  GlobalObjectIdHash: 3360081182
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -635,14 +667,44 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VeilOfColours.Network.SimplePlayer2D
   ShowTopMostFoldoutHeaderGroup: 1
-  moveSpeed: 5
-  jumpForce: 10
+  moveAction: {fileID: 0}
+  jumpAction: {fileID: 0}
+  dashAction: {fileID: 0}
+  climbAction: {fileID: 0}
+  maxSpeed: 9
+  acceleration: 50
+  deceleration: 60
+  airAcceleration: 30
+  airDeceleration: 30
+  jumpForce: 16
+  jumpCutMultiplier: 0.75
+  coyoteTime: 0.15
+  jumpBufferTime: 0.15
+  dashSpeed: 25
+  dashDuration: 0.25
+  dashCooldown: 0.5
+  dashResetOnGround: 1
+  climbSpeed: 5
+  maxClimbStamina: 100
+  climbStaminaDrainRate: 40
+  climbStaminaHangRate: 15
+  climbStaminaRegenDelay: 0.5
+  ledgeClimbBoost: 20
+  wallJumpForce: 15
+  wallJumpPush: 100
+  wallSlideSpeed: 2
+  climbJumpStaminaCost: 20
+  fallMultiplier: 2.5
+  lowJumpMultiplier: 2
+  maxFallSpeed: 20
   groundCheck: {fileID: 5189023657513006131}
-  groundCheckRadius: 0.2
+  groundCheckRadius: 0.3
   groundLayer:
     serializedVersion: 2
     m_Bits: 8
-  playerCamera: {fileID: 2769143714376100532}
+  wallCheckFront: {fileID: 2997319888424435167}
+  wallCheckDistance: 0.5
+  flipSpeed: 40
 --- !u!114 &3044659649591904390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -659,6 +721,7 @@ MonoBehaviour:
   playerName: PlayerTwo
   isPlayerOne: 0
   targetLevel: {fileID: 0}
+  playerCameraObject: {fileID: 5731302267308688363}
 --- !u!212 &6479326836676515275
 SpriteRenderer:
   m_ObjectHideFlags: 0
@@ -809,9 +872,9 @@ Rigidbody2D:
   m_ExcludeLayers:
     serializedVersion: 2
     m_Bits: 0
-  m_Interpolate: 0
+  m_Interpolate: 1
   m_SleepingMode: 1
-  m_CollisionDetection: 0
+  m_CollisionDetection: 1
   m_Constraints: 4
 --- !u!70 &7653657506260876698
 CapsuleCollider2D:
@@ -823,7 +886,7 @@ CapsuleCollider2D:
   m_Enabled: 1
   serializedVersion: 3
   m_Density: 1
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: e388d9cdc70de944caca35db00232434, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
