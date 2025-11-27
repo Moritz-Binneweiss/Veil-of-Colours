@@ -133,6 +133,10 @@ namespace VeilOfColours.Players
         [SerializeField]
         private Camera playerCamera;
 
+        [Header("Visual Settings")]
+        [SerializeField]
+        private float flipSpeed = 20f; // How fast the player flips (higher = faster)
+
         private Rigidbody2D rb;
         private Animator animator;
         private bool isGrounded;
@@ -437,6 +441,23 @@ namespace VeilOfColours.Players
 
             bool isWalking = Mathf.Abs(rb.linearVelocity.x) > WalkingThreshold;
             animator.SetBool("isWalking", isWalking);
+
+            // Smooth flip player sprite based on movement direction
+            float targetScaleX = transform.localScale.x;
+
+            if (moveInput.x > 0.01f)
+            {
+                targetScaleX = 1; // Face right
+            }
+            else if (moveInput.x < -0.01f)
+            {
+                targetScaleX = -1; // Face left
+            }
+
+            // Lerp to target scale for smooth flip
+            float currentScaleX = transform.localScale.x;
+            float newScaleX = Mathf.Lerp(currentScaleX, targetScaleX, flipSpeed * Time.deltaTime);
+            transform.localScale = new Vector3(newScaleX, 1, 1);
         }
 
         private void Jump()

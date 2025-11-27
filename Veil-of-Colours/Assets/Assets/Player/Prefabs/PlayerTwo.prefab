@@ -707,6 +707,7 @@ MonoBehaviour:
   wallCheckFront: {fileID: 2997319888424435167}
   wallCheckDistance: 0.5
   playerCamera: {fileID: 2769143714376100532}
+  flipSpeed: 40
 --- !u!114 &3044659649591904390
 MonoBehaviour:
   m_ObjectHideFlags: 0
