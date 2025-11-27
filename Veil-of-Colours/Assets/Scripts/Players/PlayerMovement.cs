@@ -73,13 +73,34 @@ namespace VeilOfColours.Players
         private float maxClimbStamina = 100f;
 
         [SerializeField]
-        private float climbStaminaDrainRate = 25f; // Per second
+        private float climbStaminaDrainRate = 25f; // Per second when moving
+
+        [SerializeField]
+        private float climbStaminaHangRate = 5f; // Per second when hanging still
 
         [SerializeField]
         private float climbStaminaRegenRate = 50f; // Per second
 
         [SerializeField]
         private float climbStaminaRegenDelay = 0.5f; // Delay before instant refill
+
+        [SerializeField]
+        private float ledgeClimbBoost = 8f; // Upward boost when reaching ledge top
+
+        [SerializeField]
+        private float ledgeCheckDistance = 0.8f; // How far above to check for ledge
+
+        [SerializeField]
+        private float wallJumpForce = 15f; // Wall jump vertical force
+
+        [SerializeField]
+        private float wallJumpPush = 8f; // Wall jump horizontal push away from wall
+
+        [SerializeField]
+        private float wallSlideSpeed = 2f; // Speed when sliding down wall without climbing
+
+        [SerializeField]
+        private float climbJumpStaminaCost = 20f; // Stamina cost for vertical climb jump
 
         [Header("Gravity Settings")]
         [SerializeField]
@@ -136,6 +157,7 @@ namespace VeilOfColours.Players
         // Climb state
         private bool isClimbing;
         private bool isTouchingWall;
+        private bool isWallSliding;
         private int wallDirection; // -1 for left, 1 for right
         private float currentClimbStamina;
         private bool canRegenClimbStamina;
@@ -146,6 +168,7 @@ namespace VeilOfColours.Players
             rb = GetComponent<Rigidbody2D>();
             animator = GetComponent<Animator>();
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rb.gravityScale = 3; // Default gravity
             currentClimbStamina = maxClimbStamina;
         }
 
@@ -264,7 +287,13 @@ namespace VeilOfColours.Players
             wasGrounded = isGrounded;
             CheckGroundState();
 
-            if (isDashing)
+            // Check for wall jump FIRST (before any other state)
+            if (jumpBufferCounter > 0f && (isClimbing || isWallSliding) && isTouchingWall)
+            {
+                WallJump(isClimbing); // Pass whether we're climbing
+                jumpBufferCounter = 0f;
+            }
+            else if (isDashing)
             {
                 HandleDash();
             }
@@ -272,12 +301,19 @@ namespace VeilOfColours.Players
             {
                 HandleClimb();
             }
+            else if (isWallSliding)
+            {
+                HandleWallSlide();
+            }
             else
             {
                 HandleJump();
                 ApplyMovement();
                 ApplyGravityModifiers();
             }
+
+            // Check for wall slide (touching wall, moving towards it, not grounded, not climbing)
+            CheckWallSlide();
 
             UpdateAnimation();
         }
@@ -317,6 +353,7 @@ namespace VeilOfColours.Players
 
                 // Stop climbing when landing
                 isClimbing = false;
+                isWallSliding = false;
 
                 // Start climb stamina regeneration timer when landing
                 canRegenClimbStamina = true;
@@ -475,13 +512,24 @@ namespace VeilOfColours.Players
 
         private void HandleClimb()
         {
-            // Drain stamina
-            currentClimbStamina -= climbStaminaDrainRate * Time.fixedDeltaTime;
+            // Get vertical input from move action
+            float verticalInput = 0f;
+            if (moveAction != null)
+            {
+                Vector2 move = moveAction.action.ReadValue<Vector2>();
+                verticalInput = move.y;
+            }
+
+            // Dynamic stamina drain: more when moving, less when hanging still
+            float staminaDrain =
+                Mathf.Abs(verticalInput) > 0.1f ? climbStaminaDrainRate : climbStaminaHangRate;
+            currentClimbStamina -= staminaDrain * Time.fixedDeltaTime;
 
             // Stop climbing if out of stamina or no longer touching wall
             if (currentClimbStamina <= 0 || !isTouchingWall)
             {
                 isClimbing = false;
+                rb.gravityScale = 3; // Restore gravity
                 currentClimbStamina = Mathf.Max(currentClimbStamina, 0);
                 return;
             }
@@ -492,19 +540,48 @@ namespace VeilOfColours.Players
             if (!climbHeld)
             {
                 isClimbing = false;
+                rb.gravityScale = 3; // Restore gravity
                 return;
             }
 
-            // Get vertical input from move action
-            float verticalInput = 0f;
-            if (moveAction != null)
+            // Check for ledge climb (climbing up and wall ends but ground above exists)
+            if (verticalInput > 0.1f && wallCheckFront != null)
             {
-                Vector2 move = moveAction.action.ReadValue<Vector2>();
-                verticalInput = move.y;
+                // Check if wall continues above (check slightly above player)
+                Vector2 wallCheckAbove = (Vector2)wallCheckFront.position + Vector2.up * 0.5f;
+                RaycastHit2D wallAboveHit = Physics2D.Raycast(
+                    wallCheckAbove,
+                    Vector2.right * wallDirection,
+                    wallCheckDistance,
+                    groundLayer
+                );
+                bool wallAbove = wallAboveHit.collider != null;
+
+                // If no wall above = we're at the ledge top, boost up AND forward!
+                if (!wallAbove)
+                {
+                    // Push player up and away from wall to get over ledge
+                    float forwardPush = wallDirection * 3f;
+                    rb.linearVelocity = new Vector2(forwardPush, ledgeClimbBoost);
+                    isClimbing = false; // Stop climbing
+                    rb.gravityScale = 3; // Restore gravity
+                    jumpReleased = true; // Allow player control
+                    return;
+                }
             }
 
-            // Apply climb velocity (very little gravity, stick to wall)
-            rb.linearVelocity = new Vector2(0, verticalInput * climbSpeed);
+            // Apply climb velocity (stick to wall when still, move when input given)
+            if (Mathf.Abs(verticalInput) > 0.01f)
+            {
+                rb.linearVelocity = new Vector2(0, verticalInput * climbSpeed);
+                rb.gravityScale = 0; // No gravity while climbing
+            }
+            else
+            {
+                // Hang still on wall (completely frozen)
+                rb.linearVelocity = Vector2.zero;
+                rb.gravityScale = 0; // No gravity while hanging
+            }
 
             // Reset air dash while climbing
             hasAirDash = true;
@@ -551,6 +628,91 @@ namespace VeilOfColours.Players
         {
             if (playerCamera != null)
                 playerCamera.enabled = false;
+        }
+
+        private void WallJump(bool fromClimb)
+        {
+            if (fromClimb)
+            {
+                // CLIMB JUMP: Check horizontal input to decide jump type
+                float horizontalInput = moveInput.x;
+
+                // If pushing away from wall: diagonal jump (no stamina cost)
+                bool pushingAway =
+                    (wallDirection > 0 && horizontalInput < -0.1f)
+                    || (wallDirection < 0 && horizontalInput > 0.1f);
+
+                if (pushingAway)
+                {
+                    // Diagonal jump away from wall
+                    float pushDirection = -wallDirection;
+                    rb.linearVelocity = new Vector2(pushDirection * wallJumpPush, wallJumpForce);
+                }
+                else
+                {
+                    // Vertical climb jump (costs stamina)
+                    if (currentClimbStamina >= climbJumpStaminaCost)
+                    {
+                        currentClimbStamina -= climbJumpStaminaCost;
+                        rb.linearVelocity = new Vector2(0, jumpForce); // Straight up
+                    }
+                    else
+                    {
+                        return; // Not enough stamina, cancel jump
+                    }
+                }
+            }
+            else
+            {
+                // WALL SLIDE JUMP: Always diagonal away from wall
+                float pushDirection = -wallDirection;
+                rb.linearVelocity = new Vector2(pushDirection * wallJumpPush, wallJumpForce);
+            }
+
+            // Stop climbing/sliding FIRST
+            isClimbing = false;
+            isWallSliding = false;
+            rb.gravityScale = 3; // Restore gravity
+
+            // Set jump state
+            isJumping = true;
+            jumpReleased = false;
+
+            // Reset air dash
+            hasAirDash = true;
+        }
+
+        private void CheckWallSlide()
+        {
+            // Only wall slide if: touching wall, not grounded, not climbing, not dashing, falling
+            if (
+                isTouchingWall
+                && !isGrounded
+                && !isClimbing
+                && !isDashing
+                && rb.linearVelocity.y < 0
+            )
+            {
+                // Check if player is pushing towards wall
+                bool pushingTowardsWall =
+                    (wallDirection > 0 && moveInput.x > 0.1f)
+                    || (wallDirection < 0 && moveInput.x < -0.1f);
+
+                isWallSliding = pushingTowardsWall;
+            }
+            else
+            {
+                isWallSliding = false;
+            }
+        }
+
+        private void HandleWallSlide()
+        {
+            // Slow down fall speed
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -wallSlideSpeed);
+
+            // Reset air dash while wall sliding
+            hasAirDash = true;
         }
 
         // Public getter for UI
