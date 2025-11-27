@@ -78,8 +78,7 @@ namespace VeilOfColours.Players
         [SerializeField]
         private float climbStaminaHangRate = 5f; // Per second when hanging still
 
-        [SerializeField]
-        private float climbStaminaRegenRate = 50f; // Per second
+        // Removed climbStaminaRegenRate - instant refill used instead
 
         [SerializeField]
         private float climbStaminaRegenDelay = 0.5f; // Delay before instant refill
@@ -87,8 +86,7 @@ namespace VeilOfColours.Players
         [SerializeField]
         private float ledgeClimbBoost = 8f; // Upward boost when reaching ledge top
 
-        [SerializeField]
-        private float ledgeCheckDistance = 0.8f; // How far above to check for ledge
+        // Removed ledgeCheckDistance - using fixed distance in code
 
         [SerializeField]
         private float wallJumpForce = 15f; // Wall jump vertical force
@@ -128,10 +126,6 @@ namespace VeilOfColours.Players
 
         [SerializeField]
         private float wallCheckDistance = 0.5f;
-
-        [Header("Camera Reference")]
-        [SerializeField]
-        private Camera playerCamera;
 
         [Header("Visual Settings")]
         [SerializeField]
@@ -623,32 +617,6 @@ namespace VeilOfColours.Players
                 Vector3 direction = Vector3.right * Mathf.Sign(transform.localScale.x);
                 Gizmos.DrawRay(wallCheckFront.position, direction * wallCheckDistance);
             }
-        }
-
-        public override void OnNetworkSpawn()
-        {
-            base.OnNetworkSpawn();
-
-            if (IsOwner)
-            {
-                AssignCamera();
-            }
-            else
-            {
-                DisableNonOwnerCamera();
-            }
-        }
-
-        private void AssignCamera()
-        {
-            if (playerCamera != null)
-                playerCamera.enabled = true;
-        }
-
-        private void DisableNonOwnerCamera()
-        {
-            if (playerCamera != null)
-                playerCamera.enabled = false;
         }
 
         private void WallJump(bool fromClimb)

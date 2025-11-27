@@ -688,10 +688,8 @@ MonoBehaviour:
   maxClimbStamina: 100
   climbStaminaDrainRate: 40
   climbStaminaHangRate: 15
-  climbStaminaRegenRate: 50
   climbStaminaRegenDelay: 0.5
   ledgeClimbBoost: 20
-  ledgeCheckDistance: 0.5
   wallJumpForce: 15
   wallJumpPush: 100
   wallSlideSpeed: 2
@@ -706,7 +704,6 @@ MonoBehaviour:
     m_Bits: 8
   wallCheckFront: {fileID: 2997319888424435167}
   wallCheckDistance: 0.5
-  playerCamera: {fileID: 2769143714376100532}
   flipSpeed: 40
 --- !u!114 &3044659649591904390
 MonoBehaviour:
@@ -724,6 +721,7 @@ MonoBehaviour:
   playerName: PlayerTwo
   isPlayerOne: 0
   targetLevel: {fileID: 0}
+  playerCameraObject: {fileID: 5731302267308688363}
 --- !u!212 &6479326836676515275
 SpriteRenderer:
   m_ObjectHideFlags: 0
