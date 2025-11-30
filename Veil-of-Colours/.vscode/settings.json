@@ -66,5 +66,5 @@
     "explorer.fileNesting.patterns": {
         "*.sln": "*.csproj"
     },
-    "dotnet.defaultSolution": "Veil-of-Colours.sln"
+    "dotnet.defaultSolution": "Veil-of-Colours.slnx"
 }
