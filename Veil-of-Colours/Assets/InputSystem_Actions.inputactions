@@ -183,6 +183,17 @@
                 },
                 {
                     "name": "",
+                    "id": "6db37334-36d8-4846-b9a9-736923e538a4",
+                    "path": "<HID::Nintendo Wireless Gamepad>/stick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "c1f7a91b-d0fd-4a62-997e-7fb9b69bf235",
                     "path": "<Gamepad>/rightStick",
                     "interactions": "",
@@ -242,7 +253,18 @@
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
                     "processors": "",
-                    "groups": "Gamepad",
+                    "groups": ";Gamepad",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "f44d2e3a-f9ff-4cef-8024-18c5d9df083e",
+                    "path": "<HID::Nintendo Wireless Gamepad>/button2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "Jump",
                     "isComposite": false,
                     "isPartOfComposite": false
@@ -293,6 +315,17 @@
                 },
                 {
                     "name": "",
+                    "id": "210d4f8a-7026-4ef8-8b91-a95067c016f6",
+                    "path": "<HID::Nintendo Wireless Gamepad>/button3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Dash",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "c00df405-e4f3-4a87-8b37-7922c991a453",
                     "path": "<Keyboard>/leftCtrl",
                     "interactions": "",
@@ -309,6 +342,17 @@
                     "interactions": "",
                     "processors": "",
                     "groups": ";Gamepad",
+                    "action": "Climb",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "00a54080-0854-4fdc-8b42-ce1bd6e0b780",
+                    "path": "<HID::Nintendo Wireless Gamepad>/button8",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
                     "action": "Climb",
                     "isComposite": false,
                     "isPartOfComposite": false
