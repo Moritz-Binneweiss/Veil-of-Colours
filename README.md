@@ -79,3 +79,4 @@ Ziel:
 
 - Animations erweitern
 - Farblayer Mechanic starten
+- Camera Follow verbessern
