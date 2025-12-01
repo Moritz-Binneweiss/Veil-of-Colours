@@ -52,3 +52,30 @@ Ziel:
 - Networking Prototype ausarbeiten
 - Basic Player Movement und Animation erweitern
 - Tilesets anschauen und einarbeiten
+
+#### **17.11.2025**
+
+Besprechung:
+
+- Test Animations gezeigt
+- Tilesets, Tilemaps und Rules
+- Networking erweitert
+
+Ziel:
+
+- Networking fertigstellen
+- Maps erweitern
+
+#### **01.12.2025**
+
+Besprechung:
+
+- fertiges Movement gezeigt
+- fertiges Networking gezeigt
+- Levels erweitert
+- Key Items test gezeigt
+
+Ziel:
+
+- Animations erweitern
+- Farblayer Mechanic starten

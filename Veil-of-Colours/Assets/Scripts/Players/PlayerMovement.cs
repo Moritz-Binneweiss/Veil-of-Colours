@@ -174,14 +174,7 @@ namespace VeilOfColours.Players
         {
             base.OnNetworkSpawn();
 
-            if (!IsOwner)
-            {
-                // Disable input for non-owners
-                enabled = false;
-                return;
-            }
-
-            Debug.Log($"PlayerMovement spawned for owner. ClientId: {OwnerClientId}");
+            Debug.Log($"PlayerMovement spawned. ClientId: {OwnerClientId}, IsOwner: {IsOwner}");
         }
 
         private void OnEnable()
