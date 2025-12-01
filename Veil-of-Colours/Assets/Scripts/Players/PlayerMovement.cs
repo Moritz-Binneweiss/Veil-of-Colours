@@ -170,8 +170,25 @@ namespace VeilOfColours.Players
             currentClimbStamina = maxClimbStamina;
         }
 
+        public override void OnNetworkSpawn()
+        {
+            base.OnNetworkSpawn();
+
+            if (!IsOwner)
+            {
+                // Disable input for non-owners
+                enabled = false;
+                return;
+            }
+
+            Debug.Log($"PlayerMovement spawned for owner. ClientId: {OwnerClientId}");
+        }
+
         private void OnEnable()
         {
+            if (!IsOwner)
+                return;
+
             if (moveAction != null)
                 moveAction.action.Enable();
             if (jumpAction != null)
@@ -184,6 +201,9 @@ namespace VeilOfColours.Players
 
         private void OnDisable()
         {
+            if (!IsOwner)
+                return;
+
             if (moveAction != null)
                 moveAction.action.Disable();
             if (jumpAction != null)
@@ -206,13 +226,17 @@ namespace VeilOfColours.Players
         private void ReadInput()
         {
             // Read movement from Input Action
-            if (moveAction != null)
+            if (moveAction != null && moveAction.action != null)
             {
                 Vector2 move = moveAction.action.ReadValue<Vector2>();
                 moveInput = new Vector2(move.x, 0);
             }
             else
             {
+                if (moveAction == null)
+                {
+                    Debug.LogWarning($"MoveAction is null for player {OwnerClientId}");
+                }
                 moveInput = Vector2.zero;
             }
 
