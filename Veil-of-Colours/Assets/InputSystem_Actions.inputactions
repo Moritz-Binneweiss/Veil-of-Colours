@@ -664,6 +664,54 @@
                     "isPartOfComposite": false
                 }
             ]
+        },
+        {
+            "name": "FarbMechanic",
+            "id": "52457515-52ab-4655-a67b-06fe0a3a9fdc",
+            "actions": [
+                {
+                    "name": "SwitchFarblayer1",
+                    "type": "Button",
+                    "id": "8119082e-191a-4c61-bb9a-8c604a078baa",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "SwitchFarblayer2",
+                    "type": "Button",
+                    "id": "4f5bea54-a981-46d6-ad7d-146d694ed06a",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                }
+            ],
+            "bindings": [
+                {
+                    "name": "",
+                    "id": "4b33dc35-47f1-4d8b-829e-45c49043a01a",
+                    "path": "<Keyboard>/1",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SwitchFarblayer1",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "931a12d9-0685-407b-a180-277e65e3e99e",
+                    "path": "<Keyboard>/2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SwitchFarblayer2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                }
+            ]
         }
     ],
     "controlSchemes": [
