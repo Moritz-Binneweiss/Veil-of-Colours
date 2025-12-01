@@ -667,10 +667,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::VeilOfColours.Network.SimplePlayer2D
   ShowTopMostFoldoutHeaderGroup: 1
-  moveAction: {fileID: 0}
-  jumpAction: {fileID: 0}
-  dashAction: {fileID: 0}
-  climbAction: {fileID: 0}
+  moveAction: {fileID: -1680190386980627800, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  jumpAction: {fileID: -2099379676528639254, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  dashAction: {fileID: 3359451590416304049, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
+  climbAction: {fileID: 7293112087562285519, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   maxSpeed: 9
   acceleration: 50
   deceleration: 60
