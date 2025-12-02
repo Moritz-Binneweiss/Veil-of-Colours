@@ -686,6 +686,15 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "SwitchFarblayer3",
+                    "type": "Button",
+                    "id": "439d9cc4-42d1-4d8a-824b-3ed7b27c7572",
+                    "expectedControlType": "",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -708,6 +717,17 @@
                     "processors": "",
                     "groups": "",
                     "action": "SwitchFarblayer2",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "de108e0b-cecf-4079-aef2-3a33e9f4e1f6",
+                    "path": "<Keyboard>/3",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "SwitchFarblayer3",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
