@@ -612,6 +612,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8362772168149236214}
+  - component: {fileID: 2473705448982396736}
   - component: {fileID: 2769143714376100532}
   - component: {fileID: 7182598716157535152}
   - component: {fileID: 8743516159638241547}
@@ -637,6 +638,24 @@ Transform:
   m_Children: []
   m_Father: {fileID: 345845290163259672}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &2473705448982396736
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5731302267308688363}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e346b3d8afbe62c428c8210c386649d8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::VeilOfColours.Players.CameraFollow
+  target: {fileID: 0}
+  smoothTime: 0.15
+  offset: {x: 0, y: 2, z: -10}
+  useDeadzone: 1
+  deadzoneWidth: 2
+  deadzoneHeight: 1
 --- !u!20 &2769143714376100532
 Camera:
   m_ObjectHideFlags: 0
@@ -912,12 +931,12 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
+  - {fileID: 8896488463906571038}
   - {fileID: 8362772168149236214}
-  - {fileID: 5876217241496827366}
-  - {fileID: 1215034140423556604}
   - {fileID: 142691690444496801}
   - {fileID: 5189023657513006131}
-  - {fileID: 8896488463906571038}
+  - {fileID: 5876217241496827366}
+  - {fileID: 1215034140423556604}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &2702660773719372992
@@ -964,7 +983,7 @@ MonoBehaviour:
   colorWheelAction: {fileID: -5187028471013626995, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
   activationThreshold: 0.3
   selectionDeadzone: 0.2
-  numberOfColors: 4
+  selectorRadius: 130
   availableColors:
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
