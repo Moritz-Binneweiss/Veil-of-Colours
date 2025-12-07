@@ -1,18 +1,18 @@
+using Unity.Netcode;
 using UnityEngine;
 using UnityEngine.InputSystem;
-using Unity.Netcode;
 using UnityEngine.Tilemaps;
 
-public class FarbMechanic : NetworkBehaviour
+public class ColorChange : NetworkBehaviour
 {
     [Header("Farblayer GameObjects")]
     [SerializeField]
     private Tilemap Farblayer1;
-    
+
     [SerializeField]
     private Tilemap Farblayer2;
 
-     [SerializeField]
+    [SerializeField]
     private Tilemap Farblayer3;
 
     [Header("Input Actions")]
@@ -22,26 +22,18 @@ public class FarbMechanic : NetworkBehaviour
     [SerializeField]
     private InputActionReference Color2;
 
-     [SerializeField]
+    [SerializeField]
     private InputActionReference Color3;
-
-    void Start()
-    {
-        
-    }
 
     void Update()
     {
-        // Nur der Owner kann Input senden
-        if (!IsOwner) return;
-        
+        if (!IsOwner)
+            return;
+
         ReadInput();
     }
 
-    public void switchFarblayer()
-    {
-        
-    }
+    public void switchFarblayer() { }
 
     private void ReadInput()
     {
@@ -51,26 +43,27 @@ public class FarbMechanic : NetworkBehaviour
             ActivateFarblayer1();
         }
 
-        // Prüfe Input für Color2 (Taste 2) 
+        // Prüfe Input für Color2 (Taste 2)
         if (Color2.action.WasPressedThisFrame())
         {
             ActivateFarblayer2();
         }
 
-         if (Color3.action.WasPressedThisFrame())
+        if (Color3.action.WasPressedThisFrame())
         {
             ToggleFarblayer3ForOtherPlayerServerRpc();
         }
     }
-     [ServerRpc]
+
+    [ServerRpc]
     private void ToggleFarblayer3ForOtherPlayerServerRpc(ServerRpcParams rpcParams = default)
     {
         // An alle anderen Clients senden (außer Sender)
         ulong senderClientId = rpcParams.Receive.SenderClientId;
-        
+
         // ClientRpc an alle außer Sender
         ToggleFarblayer3ClientRpc(senderClientId);
-        
+
         Debug.Log($"Player {senderClientId} triggered Farblayer3 toggle for other players");
     }
 
@@ -78,16 +71,18 @@ public class FarbMechanic : NetworkBehaviour
     private void ToggleFarblayer3ClientRpc(ulong senderClientId)
     {
         // Nur ausführen wenn nicht der Sender
-        if (NetworkManager.Singleton.LocalClientId == senderClientId) return;
-        
+        if (NetworkManager.Singleton.LocalClientId == senderClientId)
+            return;
+
         if (Farblayer3 != null)
         {
             bool isActive = Farblayer3.gameObject.activeSelf;
             Farblayer3.gameObject.SetActive(!isActive);
-            Debug.Log($"Farblayer3 {(!isActive ? "activated" : "deactivated")} by Player {senderClientId}!");
+            Debug.Log(
+                $"Farblayer3 {(!isActive ? "activated" : "deactivated")} by Player {senderClientId}!"
+            );
         }
     }
-
 
     private void ActivateFarblayer1()
     {
@@ -109,7 +104,6 @@ public class FarbMechanic : NetworkBehaviour
         }
     }
 
-   
     void OnEnable()
     {
         Color1.action.Enable();
