@@ -83,9 +83,8 @@ namespace VeilOfColours.GameLogic
             if (colorWheelAction == null)
                 return;
 
-            Vector2 stickInput = colorWheelAction.action.ReadValue<Vector2>();
-            currentStickInput = stickInput;
-            float magnitude = stickInput.magnitude;
+            Vector2 inputVector = colorWheelAction.action.ReadValue<Vector2>();
+            float magnitude = inputVector.magnitude;
 
             if (magnitude > activationThreshold && !isWheelActive)
             {
@@ -98,7 +97,7 @@ namespace VeilOfColours.GameLogic
 
             if (isWheelActive && magnitude > selectionDeadzone)
             {
-                UpdateColorSelection(stickInput);
+                UpdateColorSelection(inputVector);
             }
         }
 
