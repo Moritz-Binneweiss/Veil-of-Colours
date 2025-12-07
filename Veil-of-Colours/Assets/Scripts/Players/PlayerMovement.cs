@@ -166,7 +166,8 @@ namespace VeilOfColours.Players
             rb = GetComponent<Rigidbody2D>();
             animator = GetComponent<Animator>();
             rb.constraints = RigidbodyConstraints2D.FreezeRotation;
-            rb.gravityScale = 3; // Default gravity
+            rb.interpolation = RigidbodyInterpolation2D.Interpolate;
+            rb.gravityScale = 3;
             currentClimbStamina = maxClimbStamina;
         }
 

@@ -20,7 +20,6 @@ public class ItemManager : MonoBehaviour
         if (Instance == null)
         {
             Instance = this;
-            DontDestroyOnLoad(gameObject);
 
             if (playerKeys.Count == 0)
             {

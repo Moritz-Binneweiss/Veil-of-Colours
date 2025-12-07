@@ -10,53 +10,51 @@ namespace VeilOfColours.Players
 
         [Header("Follow Settings")]
         [SerializeField]
-        private float smoothSpeed = 10f; // How quickly camera follows player
+        private float smoothTime = 0.2f;
 
         [SerializeField]
-        private Vector3 offset = new Vector3(0, 2f, -10f); // Camera offset from player
+        private Vector3 offset = new Vector3(0, 2f, -10f);
 
         [Header("Deadzone")]
         [SerializeField]
         private bool useDeadzone = true;
 
         [SerializeField]
-        private float deadzoneWidth = 2f; // Horizontal deadzone
+        private float deadzoneWidth = 3f;
 
         [SerializeField]
-        private float deadzoneHeight = 1f; // Vertical deadzone
+        private float deadzoneHeight = 2f;
 
         [Header("Look Ahead")]
         [SerializeField]
         private bool useLookAhead = true;
 
         [SerializeField]
-        private float lookAheadDistance = 3f; // How far ahead to look
+        private float lookAheadDistance = 2f;
 
         [SerializeField]
-        private float lookAheadSpeed = 2f; // How quickly look-ahead adjusts
+        private float lookAheadSmooth = 5f;
 
-        [Header("Bounds (Optional)")]
-        [SerializeField]
-        private bool useBounds = false;
-
-        [SerializeField]
-        private Vector2 minBounds = new Vector2(-100, -100);
-
-        [SerializeField]
-        private Vector2 maxBounds = new Vector2(100, 100);
-
-        private Vector3 currentVelocity;
-        private Vector3 desiredPosition;
-        private float currentLookAhead;
+        private Vector3 velocity = Vector3.zero;
+        private Vector3 currentLookAhead = Vector3.zero;
         private Rigidbody2D targetRigidbody;
 
         private void Start()
         {
+            if (transform.parent != null)
+            {
+                Transform playerTransform = transform.parent;
+                transform.SetParent(null);
+                if (target == null)
+                    target = playerTransform;
+            }
+
             if (target != null)
             {
                 targetRigidbody = target.GetComponent<Rigidbody2D>();
-                // Snap camera to target initially
-                transform.position = target.position + offset;
+                Vector3 targetPos = target.position;
+                targetPos.z = offset.z;
+                transform.position = targetPos;
             }
         }
 
@@ -65,33 +63,22 @@ namespace VeilOfColours.Players
             if (target == null)
                 return;
 
-            UpdateCameraPosition();
-        }
-
-        private void UpdateCameraPosition()
-        {
             Vector3 targetPosition = target.position;
 
-            // Apply look-ahead based on player velocity
+            // Look ahead in movement direction
             if (useLookAhead && targetRigidbody != null)
             {
-                float targetLookAhead = 0f;
-
-                // Look ahead in direction of movement
-                if (Mathf.Abs(targetRigidbody.linearVelocity.x) > 0.5f)
-                {
-                    targetLookAhead =
-                        Mathf.Sign(targetRigidbody.linearVelocity.x) * lookAheadDistance;
-                }
-
-                // Smooth look-ahead transition
-                currentLookAhead = Mathf.Lerp(
+                Vector3 targetLookAhead = new Vector3(
+                    Mathf.Sign(targetRigidbody.linearVelocity.x) * lookAheadDistance,
+                    0f,
+                    0f
+                );
+                currentLookAhead = Vector3.Lerp(
                     currentLookAhead,
                     targetLookAhead,
-                    lookAheadSpeed * Time.deltaTime
+                    Time.deltaTime * lookAheadSmooth
                 );
-
-                targetPosition.x += currentLookAhead;
+                targetPosition += currentLookAhead;
             }
 
             // Apply deadzone
@@ -100,7 +87,6 @@ namespace VeilOfColours.Players
                 Vector3 currentPos = transform.position;
                 Vector3 diff = targetPosition - currentPos;
 
-                // Only move camera if target exits deadzone
                 if (Mathf.Abs(diff.x) > deadzoneWidth)
                 {
                     float move = Mathf.Abs(diff.x) - deadzoneWidth;
@@ -122,55 +108,41 @@ namespace VeilOfColours.Players
                 }
             }
 
-            // Add offset
-            desiredPosition = targetPosition + offset;
-
-            // Apply bounds
-            if (useBounds)
-            {
-                desiredPosition.x = Mathf.Clamp(desiredPosition.x, minBounds.x, maxBounds.x);
-                desiredPosition.y = Mathf.Clamp(desiredPosition.y, minBounds.y, maxBounds.y);
-            }
+            Vector3 desiredPosition = targetPosition + offset;
+            desiredPosition.z = offset.z;
 
             // Smooth follow
-            transform.position = Vector3.Lerp(
+            transform.position = Vector3.SmoothDamp(
                 transform.position,
                 desiredPosition,
-                smoothSpeed * Time.deltaTime
+                ref velocity,
+                smoothTime
             );
         }
 
         public void SetTarget(Transform newTarget)
         {
             target = newTarget;
+
             if (target != null)
             {
                 targetRigidbody = target.GetComponent<Rigidbody2D>();
-                transform.position = target.position + offset;
+                Vector3 targetPos = target.position;
+                targetPos.z = offset.z;
+                transform.position = targetPos;
             }
         }
 
-        public void SnapToTarget()
+        private void OnDrawGizmos()
         {
-            if (target != null)
-            {
-                transform.position = target.position + offset;
-            }
-        }
-
-        // Visualize deadzone in editor
-        private void OnDrawGizmosSelected()
-        {
-            if (!useDeadzone)
+            if (!useDeadzone || !Application.isPlaying)
                 return;
 
+            // Draw deadzone
             Gizmos.color = Color.yellow;
             Vector3 center = transform.position;
             center.z = 0;
-
-            // Draw deadzone rectangle
-            Vector3 size = new Vector3(deadzoneWidth * 2, deadzoneHeight * 2, 0);
-            Gizmos.DrawWireCube(center, size);
+            Gizmos.DrawWireCube(center, new Vector3(deadzoneWidth * 2, deadzoneHeight * 2, 0));
         }
     }
 }
