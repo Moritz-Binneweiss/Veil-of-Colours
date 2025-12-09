@@ -80,3 +80,16 @@ Ziel:
 - Animations erweitern
 - Farblayer Mechanic starten
 - Camera Follow verbessern
+
+#### **08.12.2025**
+
+Besprechung:
+
+- Tilemap flickering Problem dargestellt
+- ColorLayer Anfänge gezeigt
+
+Ziel:
+
+- Camera Follow verbessern
+- Animations erweitern
+
