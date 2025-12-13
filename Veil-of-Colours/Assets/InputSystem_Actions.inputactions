@@ -356,6 +356,17 @@
                     "action": "ColorWheel",
                     "isComposite": false,
                     "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "9b0295ec-ca40-4a61-8cef-26ccb703cb31",
+                    "path": "",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "ColorWheel",
+                    "isComposite": false,
+                    "isPartOfComposite": false
                 }
             ]
         },
