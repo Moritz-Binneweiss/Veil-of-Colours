@@ -93,3 +93,24 @@ Ziel:
 - Camera Follow verbessern
 - Animations erweitern
 
+#### **15.12.2025**
+
+Besprechung:
+
+- LevelA erweiterungen gezeigt
+- Animations angefangen
+- Präsentation fragen
+
+Ziel:
+
+- Präsentation vorbereiten
+- LevelA und LevelB fertigstellen
+- Animations verbessern und erweitern
+- Puzzle Elemente einbauen
+- Polishing
+
+Präsentation:
+- 15 min
+- 2D und Networking vorallem Präsentieren wie das funktioniert
+- Technologien erklären
+- Flickering Problem erklären
