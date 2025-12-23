@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VeilOfColours.General;
 
@@ -21,6 +22,19 @@ namespace VeilOfColours.UI
 
             if (mainMenuButton != null)
                 mainMenuButton.onClick.AddListener(OnMainMenuClicked);
+        }
+
+        private void OnEnable()
+        {
+            SelectFirstButton();
+        }
+
+        private void SelectFirstButton()
+        {
+            if (restartButton != null)
+            {
+                EventSystem.current?.SetSelectedGameObject(restartButton.gameObject);
+            }
         }
 
         private void OnRestartClicked()

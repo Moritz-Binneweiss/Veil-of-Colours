@@ -1,6 +1,7 @@
 using TMPro;
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VeilOfColours.General;
 using VeilOfColours.Networking;
@@ -41,6 +42,15 @@ namespace VeilOfColours.UI
         private void OnEnable()
         {
             UpdateCodeDisplay();
+            SelectFirstButton();
+        }
+
+        private void SelectFirstButton()
+        {
+            if (continueButton != null)
+            {
+                EventSystem.current?.SetSelectedGameObject(continueButton.gameObject);
+            }
         }
 
         private void InitializeCodeDisplay()
