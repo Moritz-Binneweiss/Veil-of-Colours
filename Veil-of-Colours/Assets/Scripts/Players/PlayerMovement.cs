@@ -460,13 +460,17 @@ namespace VeilOfColours.Players
             animator.SetBool("isCrabing", isCrabing);
 
             // Walking only when on ground and not climbing/dashing
-            bool isWalking = isGrounded && !isClimbing && !isDashing && Mathf.Abs(rb.linearVelocity.x) > WalkingThreshold;
+            bool isWalking =
+                isGrounded
+                && !isClimbing
+                && !isDashing
+                && Mathf.Abs(rb.linearVelocity.x) > WalkingThreshold;
             animator.SetBool("isWalking", isWalking);
 
             // Jump animation: true when in air and not climbing/dashing
             bool shouldShowJump = !isGrounded && !isClimbing && !isDashing;
             animator.SetBool("isJumping", shouldShowJump);
-            
+
             // Optional: send Y velocity for rise/fall animations
             animator.SetFloat("yVelocity", rb.linearVelocity.y);
 
@@ -523,7 +527,7 @@ namespace VeilOfColours.Players
             canDash = false;
             dashCooldownTimer = dashCooldown;
 
-            PlayerAfterImagePool.Instance.GetFromPool();
+            DashAfterImage.Instance.GetFromPool();
             lastImageXPos = transform.position.x;
 
             // Use up air dash if in air
@@ -554,7 +558,7 @@ namespace VeilOfColours.Players
             // Spawn after images during dash
             if (Mathf.Abs(transform.position.x - lastImageXPos) > distanceBetweenImages)
             {
-                PlayerAfterImagePool.Instance.GetFromPool();
+                DashAfterImage.Instance.GetFromPool();
                 lastImageXPos = transform.position.x;
             }
         }

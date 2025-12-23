@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class PlayerAfterImageSprite : MonoBehaviour
+public class DashImage : MonoBehaviour
 {
     [SerializeField]
     private float activeTime = 0.1f;
@@ -21,7 +21,7 @@ public class PlayerAfterImageSprite : MonoBehaviour
     private void OnEnable()
     {
         spriteRenderer = GetComponent<SpriteRenderer>();
-        
+
         // Find player only if not cached yet
         if (player == null)
         {
@@ -56,7 +56,7 @@ public class PlayerAfterImageSprite : MonoBehaviour
 
         if (Time.time >= (timeActivated + activeTime))
         {
-            PlayerAfterImagePool.Instance.AddToPool(gameObject);
+            DashAfterImage.Instance.AddToPool(gameObject);
         }
     }
 }

@@ -9,14 +9,40 @@ namespace VeilOfColours.UI
         [SerializeField]
         private GameObject gameUICanvas;
 
+        [SerializeField]
+        private GameObject pauseUICanvas;
+
+        [SerializeField]
+        private GameObject gameOverUICanvas;
+
+        [SerializeField]
+        private GameObject victoryUICanvas;
+
         private void Start()
         {
+            InitializeUI();
             SubscribeToNetworkEvents();
         }
 
         private void OnDestroy()
         {
             UnsubscribeFromNetworkEvents();
+        }
+
+        private void InitializeUI()
+        {
+            // Start with game UI hidden, show when connected
+            if (gameUICanvas != null)
+                gameUICanvas.SetActive(false);
+
+            if (pauseUICanvas != null)
+                pauseUICanvas.SetActive(false);
+
+            if (gameOverUICanvas != null)
+                gameOverUICanvas.SetActive(false);
+
+            if (victoryUICanvas != null)
+                victoryUICanvas.SetActive(false);
         }
 
         private void SubscribeToNetworkEvents()
@@ -49,18 +75,14 @@ namespace VeilOfColours.UI
 
         private void ShowGameUI()
         {
-            SetGameUIActive(true);
+            if (gameUICanvas != null)
+                gameUICanvas.SetActive(true);
         }
 
         public void HideGameUI()
         {
-            SetGameUIActive(false);
-        }
-
-        private void SetGameUIActive(bool active)
-        {
             if (gameUICanvas != null)
-                gameUICanvas.SetActive(active);
+                gameUICanvas.SetActive(false);
         }
     }
 }

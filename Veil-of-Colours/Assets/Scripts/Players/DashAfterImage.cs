@@ -2,14 +2,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class PlayerAfterImagePool : MonoBehaviour
+public class DashAfterImage : MonoBehaviour
 {
     [SerializeField]
     private GameObject afterImagePrefab;
 
     private Queue<GameObject> availableObjects = new Queue<GameObject>();
 
-    public static PlayerAfterImagePool Instance { get; private set; }
+    public static DashAfterImage Instance { get; private set; }
 
     private void Awake()
     {
