@@ -150,10 +150,14 @@ namespace VeilOfColours.Players
         private bool hasAirDash = true; // Track if air dash is available
         private float dashTimeLeft;
         private float dashCooldownTimer;
+        private float lastImageXPos;
+        private float lastDash = -100f;
+        public float distanceBetweenImages;
         private Vector2 dashDirection;
 
         // Climb state
         private bool isClimbing;
+        private bool isCrabing; // For crab animation state
         private bool isTouchingWall;
         private bool isWallSliding;
         private int wallDirection; // -1 for left, 1 for right
@@ -368,7 +372,6 @@ namespace VeilOfColours.Players
                 }
 
                 // Stop climbing when landing
-                isClimbing = false;
                 isWallSliding = false;
 
                 // Start climb stamina regeneration timer when landing
@@ -451,8 +454,21 @@ namespace VeilOfColours.Players
             if (animator == null)
                 return;
 
-            bool isWalking = Mathf.Abs(rb.linearVelocity.x) > WalkingThreshold;
+            // Set animation states based on priority
+            animator.SetBool("isDashing", isDashing);
+            animator.SetBool("isClimbing", isClimbing);
+            animator.SetBool("isCrabing", isCrabing);
+
+            // Walking only when on ground and not climbing/dashing
+            bool isWalking = isGrounded && !isClimbing && !isDashing && Mathf.Abs(rb.linearVelocity.x) > WalkingThreshold;
             animator.SetBool("isWalking", isWalking);
+
+            // Jump animation: true when in air and not climbing/dashing
+            bool shouldShowJump = !isGrounded && !isClimbing && !isDashing;
+            animator.SetBool("isJumping", shouldShowJump);
+            
+            // Optional: send Y velocity for rise/fall animations
+            animator.SetFloat("yVelocity", rb.linearVelocity.y);
 
             // Smooth flip player sprite based on movement direction
             float targetScaleX = transform.localScale.x;
@@ -503,8 +519,12 @@ namespace VeilOfColours.Players
             dashDirection = inputDirection.normalized;
             isDashing = true;
             dashTimeLeft = dashDuration;
+            lastDash = Time.time;
             canDash = false;
             dashCooldownTimer = dashCooldown;
+
+            PlayerAfterImagePool.Instance.GetFromPool();
+            lastImageXPos = transform.position.x;
 
             // Use up air dash if in air
             if (!isGrounded)
@@ -530,6 +550,13 @@ namespace VeilOfColours.Players
 
             // Apply dash velocity (ignore gravity during dash)
             rb.linearVelocity = dashDirection * dashSpeed;
+
+            // Spawn after images during dash
+            if (Mathf.Abs(transform.position.x - lastImageXPos) > distanceBetweenImages)
+            {
+                PlayerAfterImagePool.Instance.GetFromPool();
+                lastImageXPos = transform.position.x;
+            }
         }
 
         private void TryStartClimb()
@@ -540,6 +567,10 @@ namespace VeilOfColours.Players
                 isClimbing = true;
                 isDashing = false; // Cancel dash if climbing
                 canRegenClimbStamina = false; // Stop regen while climbing
+            }
+            else
+            {
+                isCrabing = false; // Not crabing if not climbing
             }
         }
 
@@ -562,6 +593,7 @@ namespace VeilOfColours.Players
             if (currentClimbStamina <= 0 || !isTouchingWall)
             {
                 isClimbing = false;
+                isCrabing = false;
                 rb.gravityScale = 3; // Restore gravity
                 currentClimbStamina = Mathf.Max(currentClimbStamina, 0);
                 return;
@@ -573,6 +605,7 @@ namespace VeilOfColours.Players
             if (!climbHeld)
             {
                 isClimbing = false;
+                isCrabing = false;
                 rb.gravityScale = 3; // Restore gravity
                 return;
             }
@@ -608,12 +641,14 @@ namespace VeilOfColours.Players
             {
                 rb.linearVelocity = new Vector2(0, verticalInput * climbSpeed);
                 rb.gravityScale = 0; // No gravity while climbing
+                isCrabing = false; // Not crabing when moving vertically
             }
             else
             {
                 // Hang still on wall (completely frozen)
                 rb.linearVelocity = Vector2.zero;
                 rb.gravityScale = 0; // No gravity while hanging
+                isCrabing = true; // Crabing when hanging still on wall
             }
 
             // Reset air dash while climbing
