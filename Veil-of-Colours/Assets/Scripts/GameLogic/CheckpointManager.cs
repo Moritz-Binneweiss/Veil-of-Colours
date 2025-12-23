@@ -19,7 +19,8 @@ public class CheckpointManager : MonoBehaviour
             return;
         }
         Instance = this;
-        DontDestroyOnLoad(gameObject);
+        // Note: CheckpointManager should be a root GameObject if you want to use DontDestroyOnLoad
+        // DontDestroyOnLoad(gameObject);
     }
 
     public void RegisterCheckpoint(GameObject cp)

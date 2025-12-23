@@ -472,7 +472,8 @@ namespace VeilOfColours.Players
             animator.SetBool("isJumping", shouldShowJump);
 
             // Optional: send Y velocity for rise/fall animations
-            animator.SetFloat("yVelocity", rb.linearVelocity.y);
+            // TODO: Add 'yVelocity' parameter to Animator Controller
+            // animator.SetFloat("yVelocity", rb.linearVelocity.y);
 
             // Smooth flip player sprite based on movement direction
             float targetScaleX = transform.localScale.x;
