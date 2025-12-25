@@ -129,15 +129,16 @@ namespace VeilOfColours.GameLogic
             if (angle < 0)
                 angle += 360f;
 
+            // New layout: Top=Red, Right=Green, Bottom=Yellow, Left=Blue
             int colorIndex;
             if (angle >= 45f && angle < 135f)
-                colorIndex = 0; // Blue
+                colorIndex = 1; // Red (Top)
             else if (angle >= 135f && angle < 225f)
-                colorIndex = 3; // Yellow
+                colorIndex = 0; // Blue (Left)
             else if (angle >= 225f && angle < 315f)
-                colorIndex = 2; // Green
+                colorIndex = 3; // Yellow (Bottom)
             else
-                colorIndex = 1; // Red
+                colorIndex = 2; // Green (Right)
 
             if (colorIndex != currentColorIndex)
             {

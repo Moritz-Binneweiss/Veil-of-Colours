@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: e91f8a0a630885f4db185ac3216b55b4
+guid: 5039ddf0fb8a4f64fbf69d2182db3adc
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -127,9 +127,9 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: BasicKey
+  - name: NyxSheet
     originalName: 
-    pivot: {x: 0.509434, y: -0.10185185}
+    pivot: {x: 0.52149, y: -0.11210763}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -137,9 +137,9 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 53
-      height: 108
-    spriteID: a00d637a9558d5641bf036b05012d3c3
+      width: 349
+      height: 223
+    spriteID: 74f5efe753c895d4e86f1e8a8a76e195
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -153,25 +153,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 1956181549
+      value0: 378674484
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: BasicKey
+    name: NyxSheet
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: BasicKey
+    - name: NyxSheet
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 37
-        y: 11
-        width: 53
-        height: 108
-      spriteId: a00d637a9558d5641bf036b05012d3c3
+        x: 10
+        y: 25
+        width: 349
+        height: 223
+      spriteId: 74f5efe753c895d4e86f1e8a8a76e195
     linkedCells: []
     tileCells: []
     tileSetIndex: 0
@@ -181,5 +181,5 @@ ScriptedImporter:
   generatePhysicsShape: 0
   secondarySpriteTextures: []
   spritePackingTag: 
-  canvasSize: {x: 128, y: 128}
-  previousTextureSize: {x: 64, y: 128}
+  canvasSize: {x: 384, y: 256}
+  previousTextureSize: {x: 512, y: 256}
