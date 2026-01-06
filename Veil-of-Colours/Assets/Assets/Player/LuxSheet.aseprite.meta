@@ -129,7 +129,7 @@ ScriptedImporter:
   animatedSpriteImportData:
   - name: LuxSheet
     originalName: 
-    pivot: {x: 0.52149, y: -0.11210763}
+    pivot: {x: 0.51388884, y: -0.041237112}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -137,8 +137,8 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 349
-      height: 223
+      width: 216
+      height: 194
     spriteID: 72e14269010adfb42aaab630ba64e747
     spriteBone: []
     spriteOutline: []
@@ -167,10 +167,10 @@ ScriptedImporter:
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 10
-        y: 25
-        width: 349
-        height: 223
+        x: 5
+        y: 8
+        width: 216
+        height: 194
       spriteId: 72e14269010adfb42aaab630ba64e747
     linkedCells: []
     tileCells: []
@@ -181,5 +181,5 @@ ScriptedImporter:
   generatePhysicsShape: 0
   secondarySpriteTextures: []
   spritePackingTag: 
-  canvasSize: {x: 384, y: 256}
-  previousTextureSize: {x: 512, y: 256}
+  canvasSize: {x: 232, y: 216}
+  previousTextureSize: {x: 256, y: 256}

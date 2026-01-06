@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 087dcb84d11cb3740b02835b80a703ee
+guid: 01df5acd459c97e448e4f3cc44d7ffed
 ScriptedImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -127,9 +127,9 @@ ScriptedImporter:
     tessellationDetail: 0
     uvTransform: {x: 0, y: 0}
   animatedSpriteImportData:
-  - name: Lux
+  - name: ColorsSheet
     originalName: 
-    pivot: {x: 0.51376146, y: 0}
+    pivot: {x: 0.51388884, y: -0.041237112}
     alignment: 9
     border: {x: 0, y: 0, z: 0, w: 0}
     customData: 
@@ -137,9 +137,9 @@ ScriptedImporter:
       serializedVersion: 2
       x: 4
       y: 4
-      width: 109
-      height: 250
-    spriteID: a3c53e73c99936c438e4453a84499c51
+      width: 216
+      height: 194
+    spriteID: d5df2c2efb7e64b44a491941419331cd
     spriteBone: []
     spriteOutline: []
     vertices: []
@@ -153,25 +153,25 @@ ScriptedImporter:
   asepriteLayers:
   - layerIndex: 0
     uuid:
-      value0: 2309168769
+      value0: 3342805857
       value1: 0
       value2: 0
       value3: 0
     guid: 0
-    name: Lux
+    name: ColorsSheet
     layerFlags: 0
     layerType: 0
     blendMode: 0
     cells:
-    - name: Lux
+    - name: ColorsSheet
       frameIndex: 0
       additiveSortOrder: 0
       cellRect:
-        x: 8
-        y: 0
-        width: 109
-        height: 250
-      spriteId: a3c53e73c99936c438e4453a84499c51
+        x: 5
+        y: 8
+        width: 216
+        height: 194
+      spriteId: d5df2c2efb7e64b44a491941419331cd
     linkedCells: []
     tileCells: []
     tileSetIndex: 0
@@ -181,5 +181,5 @@ ScriptedImporter:
   generatePhysicsShape: 0
   secondarySpriteTextures: []
   spritePackingTag: 
-  canvasSize: {x: 128, y: 256}
-  previousTextureSize: {x: 256, y: 512}
+  canvasSize: {x: 232, y: 216}
+  previousTextureSize: {x: 256, y: 256}
