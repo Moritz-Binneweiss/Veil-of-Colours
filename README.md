@@ -110,7 +110,17 @@ Ziel:
 - Polishing
 
 Präsentation:
+
 - 15 min
 - 2D und Networking vorallem Präsentieren wie das funktioniert
 - Technologien erklären
 - Flickering Problem erklären
+
+#### **12.01.2026**
+
+Besprechung:
+
+- Präsentation gehalten
+- Basic UI
+- Neue Designs für alles
+- Checkpoint und Door System
