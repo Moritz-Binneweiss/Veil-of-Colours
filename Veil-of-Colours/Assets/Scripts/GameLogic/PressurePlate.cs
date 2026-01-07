@@ -4,8 +4,7 @@ using UnityEngine.Tilemaps;
 public class PressurePlate : MonoBehaviour
 {
     [Header("Plate Settings")]
-    public DoorController door;
-    public Tilemap pressurePlate; // das GameObject, das bewegt werden soll
+    public Tilemap pressurePlate;
     public float pressDepth = 0.15f;
     public float moveSpeed = 4f;
     [Tooltip("Maximale Strecke, die die Platte bewegen darf")]
@@ -18,7 +17,6 @@ public class PressurePlate : MonoBehaviour
     private bool playerOnPlate = false;
     private bool hasMovedTooFar = false;
 
-    // Referenz zum Spieler auf der Platte
     private Transform playerOnPlatform = null;
 
     private void Awake()
@@ -34,7 +32,6 @@ public class PressurePlate : MonoBehaviour
         Vector3 previousWorldPos = plateTransform.position;
         Vector3 newLocalPos = Vector3.MoveTowards(plateTransform.localPosition, targetLocalPos, moveSpeed * Time.deltaTime);
 
-        // Prüfen, ob die maximale Bewegungsdistanz überschritten würde
         float distanceFromStart = Vector3.Distance(newLocalPos, startLocalPos);
 
         if (distanceFromStart <= maxMovementDistance)
@@ -44,13 +41,10 @@ public class PressurePlate : MonoBehaviour
         }
         else
         {
-            // Bewegung auf maxMovementDistance begrenzen
             Vector3 direction = (targetLocalPos - startLocalPos).normalized;
             plateTransform.localPosition = startLocalPos + direction * maxMovementDistance;
-
         }
 
-        // Spieler mit der Platte bewegen
         Vector3 currentWorldPos = plateTransform.position;
         Vector3 deltaMovement = currentWorldPos - previousWorldPos;
         MovePlayerWithPlatform(deltaMovement);
@@ -71,9 +65,15 @@ public class PressurePlate : MonoBehaviour
         playerOnPlate = true;
         playerOnPlatform = other.transform;
 
-        if (!hasMovedTooFar)
+        var mgr = PressurePlateManager.Instance;
+        if (mgr != null && mgr.IsServer)
         {
-            SetPressed(true);
+            // Server führt die Aktivierung direkt aus (Server-Instanz des Managers entscheidet und broadcastet)
+            mgr.RequestActivatePlate(gameObject, true);
+        }
+        else
+        {
+            mgr?.RequestActivatePlate(gameObject, true);
         }
     }
 
@@ -84,20 +84,27 @@ public class PressurePlate : MonoBehaviour
         playerOnPlate = false;
         playerOnPlatform = null;
 
-        SetPressed(false);
-        hasMovedTooFar = false; // Reset beim Verlassen
+        var mgr = PressurePlateManager.Instance;
+        if (mgr != null && mgr.IsServer)
+        {
+            mgr.RequestActivatePlate(gameObject, false);
+        }
+        else
+        {
+            mgr?.RequestActivatePlate(gameObject, false);
+        }
+
+        hasMovedTooFar = false;
     }
 
-    private void SetPressed(bool pressed)
+    // Bewegt nur die Plate lokal; Door-Zustand wird vom Manager gesetzt (ApplyDoorStateLocal)
+    public void ActivateLocal(bool pressed)
     {
         if (!hasMovedTooFar || !pressed)
         {
             targetLocalPos = pressed ? pressedLocalPos : startLocalPos;
-            if (door != null)
-            {
-                if (pressed) door.Open();
-                else door.Close();
-            }
         }
     }
+
+    private void Reset() => GetComponent<Collider2D>().isTrigger = true;
 }
