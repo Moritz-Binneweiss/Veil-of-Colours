@@ -3,6 +3,7 @@ using UnityEngine;
 
 public class CheckpointScript : MonoBehaviour
 {
+    public Sprite activatedCheckpointSprite;
     private bool activated = false;
 
     private void Reset() => GetComponent<Collider2D>().isTrigger = true;
@@ -15,6 +16,16 @@ public class CheckpointScript : MonoBehaviour
             return;
         activated = true;
         CheckpointManager.Instance?.ActivateCheckpoint(gameObject);
+        SetSpriteActive(true);
         Debug.Log($"Checkpoint '{name}' activated");
+    }
+
+    public void SetSpriteActive(bool isActive)
+    {
+        var spriteRenderer = GetComponent<SpriteRenderer>();
+        if (spriteRenderer != null && activatedCheckpointSprite != null)
+        {
+            spriteRenderer.sprite = isActive ? activatedCheckpointSprite : spriteRenderer.sprite;
+        }
     }
 }
