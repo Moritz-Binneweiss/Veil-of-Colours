@@ -77,6 +77,7 @@ namespace VeilOfColours.GameLogic
         private void OnColorChanged(int previousValue, int newValue)
         {
             ApplyColorLayer(newValue);
+            LampManager.Instance.ApplyColorToAllLamps();
         }
 
         public void RequestColorChange(int colorIndex)
