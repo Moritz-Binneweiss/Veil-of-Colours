@@ -654,11 +654,10 @@ MonoBehaviour:
   smoothTime: 0.15
   offset: {x: 0, y: 2, z: -10}
   useDeadzone: 1
-  deadzoneWidth: 2
-  deadzoneHeight: 1
-  useLookAhead: 1
-  lookAheadDistance: 2
-  lookAheadSmooth: 5
+  deadzoneWidth: 6
+  deadzoneHeight: 6
+  recenterSpeed: 0.125
+  idleThreshold: 0.1
 --- !u!20 &2769143714376100532
 Camera:
   m_ObjectHideFlags: 0

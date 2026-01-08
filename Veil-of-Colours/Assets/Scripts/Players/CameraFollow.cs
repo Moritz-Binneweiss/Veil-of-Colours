@@ -20,23 +20,18 @@ namespace VeilOfColours.Players
         private bool useDeadzone = true;
 
         [SerializeField]
-        private float deadzoneWidth = 3f;
+        private float deadzoneWidth = 6f; // Smaller deadzone for more responsive camera
 
         [SerializeField]
-        private float deadzoneHeight = 2f;
-
-        [Header("Look Ahead")]
-        [SerializeField]
-        private bool useLookAhead = true;
+        private float deadzoneHeight = 5f; // Vertical deadzone threshold
 
         [SerializeField]
-        private float lookAheadDistance = 2f;
+        private float recenterSpeed = 0.125f; // Lower value = smoother/slower recentering
 
         [SerializeField]
-        private float lookAheadSmooth = 5f;
+        private float idleThreshold = 0.1f; // Velocity threshold to consider player as idle
 
         private Vector3 velocity = Vector3.zero;
-        private Vector3 currentLookAhead = Vector3.zero;
         private Rigidbody2D targetRigidbody;
 
         private void Start()
@@ -64,59 +59,64 @@ namespace VeilOfColours.Players
                 return;
 
             Vector3 targetPosition = target.position;
+            bool isPlayerMoving = false;
 
-            // Look ahead in movement direction
-            if (useLookAhead && targetRigidbody != null)
+            // Check if player is moving
+            if (targetRigidbody != null)
             {
-                Vector3 targetLookAhead = new Vector3(
-                    Mathf.Sign(targetRigidbody.linearVelocity.x) * lookAheadDistance,
-                    0f,
-                    0f
-                );
-                currentLookAhead = Vector3.Lerp(
-                    currentLookAhead,
-                    targetLookAhead,
-                    Time.deltaTime * lookAheadSmooth
-                );
-                targetPosition += currentLookAhead;
+                isPlayerMoving = targetRigidbody.linearVelocity.magnitude > idleThreshold;
             }
 
-            // Apply deadzone
-            if (useDeadzone)
+            // Apply deadzone - only when moving, recenter when idle
+            if (useDeadzone && isPlayerMoving)
             {
-                Vector3 currentPos = transform.position;
-                Vector3 diff = targetPosition - currentPos;
+                // Compare camera position (minus offset) with target position
+                Vector3 currentPosWithoutOffset = transform.position - offset;
+                Vector3 diff = targetPosition - currentPosWithoutOffset;
 
+                // Horizontal deadzone
                 if (Mathf.Abs(diff.x) > deadzoneWidth)
                 {
                     float move = Mathf.Abs(diff.x) - deadzoneWidth;
-                    targetPosition.x = currentPos.x + Mathf.Sign(diff.x) * move;
+                    targetPosition.x = currentPosWithoutOffset.x + Mathf.Sign(diff.x) * move;
                 }
                 else
                 {
-                    targetPosition.x = currentPos.x;
+                    targetPosition.x = currentPosWithoutOffset.x;
                 }
 
+                // Vertical deadzone
                 if (Mathf.Abs(diff.y) > deadzoneHeight)
                 {
                     float move = Mathf.Abs(diff.y) - deadzoneHeight;
-                    targetPosition.y = currentPos.y + Mathf.Sign(diff.y) * move;
+                    targetPosition.y = currentPosWithoutOffset.y + Mathf.Sign(diff.y) * move;
                 }
                 else
                 {
-                    targetPosition.y = currentPos.y;
+                    targetPosition.y = currentPosWithoutOffset.y;
                 }
+            }
+            // When player is idle, gradually recenter the camera
+            else if (!isPlayerMoving)
+            {
+                // No deadzone when idle - smoothly move towards centered position
+                targetPosition = target.position;
             }
 
             Vector3 desiredPosition = targetPosition + offset;
             desiredPosition.z = offset.z;
+
+            // Use different smooth time based on whether player is idle
+            float currentSmoothTime = isPlayerMoving
+                ? smoothTime
+                : (smoothTime * (1f / recenterSpeed));
 
             // Smooth follow
             transform.position = Vector3.SmoothDamp(
                 transform.position,
                 desiredPosition,
                 ref velocity,
-                smoothTime
+                currentSmoothTime
             );
         }
 

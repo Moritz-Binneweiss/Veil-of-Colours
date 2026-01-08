@@ -80,3 +80,47 @@ Ziel:
 - Animations erweitern
 - Farblayer Mechanic starten
 - Camera Follow verbessern
+
+#### **08.12.2025**
+
+Besprechung:
+
+- Tilemap flickering Problem dargestellt
+- ColorLayer Anfänge gezeigt
+
+Ziel:
+
+- Camera Follow verbessern
+- Animations erweitern
+
+#### **15.12.2025**
+
+Besprechung:
+
+- LevelA erweiterungen gezeigt
+- Animations angefangen
+- Präsentation fragen
+
+Ziel:
+
+- Präsentation vorbereiten
+- LevelA und LevelB fertigstellen
+- Animations verbessern und erweitern
+- Puzzle Elemente einbauen
+- Polishing
+
+Präsentation:
+
+- 15 min
+- 2D und Networking vorallem Präsentieren wie das funktioniert
+- Technologien erklären
+- Flickering Problem erklären
+
+#### **12.01.2026**
+
+Besprechung:
+
+- Präsentation gehalten
+- Basic UI
+- Neue Designs für alles
+- Checkpoint und Door System
