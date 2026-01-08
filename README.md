@@ -1,21 +1,23 @@
-# Games Projekt Titel
+# **Veil of Colours**
 
-Teammitglieder: Max Mustermann(123456), John Doe (654321)
+## **Mitwirkende**
 
-Unity Version: 6000.3.0f1
+- **Moritz Binneweiß** - Networking and Designing Developer
+- **Sebastian Schuster** - Animating Developer
+- **Vanessa Schoger** - Level and Tilemapping Developer
+
+Unity Version: 6000.2.6f2
+
+### **Figma Board**
+
+- https://www.figma.com/board/kBoRnHPDNGJm4fzHZrUeEu/Veil-of-Colours?node-id=0-1&t=oa8m78GmibciiSQd-1
 
 ## Verwendete Assets
 
-- Asset 1: Robot Kyle - Unity Technologies https://assetstore.unity.com/packages/3d/characters/robots/robot-kyle-urp-4696
 - Asset 2: `Name + (Optional) Publisher + <Link>`
 - Asset 3: `Name + (Optional) Publisher + <Link>`
 
-## (Optional) Startup
-
-Um das Projekt zu Starten muss eine Internet Verbindung Existieren.
-Außerdem wird eine lokale Installation von `Software XY` benötigt.
-
-## (Optional) Steuerung
+## Steuerung
 
 |           Taste           |             Funktion             |
 | :-----------------------: | :------------------------------: |
@@ -42,18 +44,6 @@ Dieses Prototyping-Projekt dient als Grundlage zur Evaluierung der ECS-Architekt
 ## (Optional) Besondere Leistung
 
 ---
-
-# **Veil of Colours**
-
-## **Mitwirkende**
-
-- **Moritz Binneweiß** - Developer
-- **Sebastian Schuster** - Developer
-- **Vanessa Schoger** - Developer
-
-### **Figma Board**
-
-- https://www.figma.com/board/kBoRnHPDNGJm4fzHZrUeEu/Veil-of-Colours?node-id=0-1&t=oa8m78GmibciiSQd-1
 
 ## **Features**
 
