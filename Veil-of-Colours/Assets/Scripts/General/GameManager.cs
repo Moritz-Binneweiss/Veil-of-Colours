@@ -86,7 +86,7 @@ namespace VeilOfColours.General
         private void Update()
         {
             // Check for pause input from any owner
-            if (IsOwner && pauseAction != null && pauseAction.action.WasPressedThisFrame())
+            if (IsClient && pauseAction != null && pauseAction.action.WasPressedThisFrame())
             {
                 if (isPaused.Value)
                 {

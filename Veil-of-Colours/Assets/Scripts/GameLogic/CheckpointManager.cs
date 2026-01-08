@@ -48,6 +48,13 @@ public class CheckpointManager : MonoBehaviour
     [ContextMenu("Teleport To Last Checkpoint (Editor)")]
     public void TeleportToLastCheckpoint()
     {
+        GameObject playerToTeleport = GameObject.FindGameObjectWithTag("Player");
+        TeleportToLastCheckpoint(playerToTeleport);
+    }
+
+    // Lokale Teleport-Methode: telepor­tiert genau das übergebene Player-GameObject
+    public void TeleportToLastCheckpoint(GameObject playerToTeleport)
+    {
         var last = GetLastCheckpoint();
         if (last == null)
         {
@@ -55,10 +62,9 @@ public class CheckpointManager : MonoBehaviour
             return;
         }
 
-        GameObject playerToTeleport = GameObject.FindGameObjectWithTag("Player");
         if (playerToTeleport == null)
         {
-            Debug.LogWarning("Player with tag 'Player' not found.");
+            Debug.LogWarning("Player to teleport is null.");
             return;
         }
 
@@ -73,8 +79,7 @@ public class CheckpointManager : MonoBehaviour
             Physics2D.SyncTransforms();
         }
 
-        Debug.Log("Player teleported to last checkpoint.");
+        Debug.Log($"Player '{playerToTeleport.name}' teleported to last checkpoint.");
     }
-
     public GameObject[] GetActiveCheckpointsArray() => activeCheckpoints.ToArray();
 }
