@@ -12,8 +12,8 @@ public class ItemManager : NetworkBehaviour
     public class LevelDoorMapping
     {
         public string levelName;
-        public GameObject triggerDoor;      // Die Tür die aktiviert werden muss
-        public GameObject[] targetDoors;    // Die Türen die sich öffnen sollen
+        public GameObject triggerDoor; // The door that must be activated
+        public GameObject[] targetDoors; // The doors that should open
     }
 
     [Header("Level Door Management")]
@@ -27,57 +27,53 @@ public class ItemManager : NetworkBehaviour
     private NetworkList<NetworkObjectReference> activatedDoors;
 
     public static ItemManager Instance { get; private set; }
+
     private void Awake()
+    {
+        if (Instance != null && Instance != this)
         {
-            if (Instance != null && Instance != this)
-            {
-                Destroy(gameObject);
-                return;
-            }
-
-            Instance = this;
-            DontDestroyOnLoad(gameObject);
-
-            collectedKeys = new NetworkList<NetworkObjectReference>();
-            activatedDoors = new NetworkList<NetworkObjectReference>();
+            Destroy(gameObject);
+            return;
         }
-    
 
-    
+        Instance = this;
+        // Note: ItemManager should be a root GameObject if you want to use DontDestroyOnLoad
+        // DontDestroyOnLoad(gameObject);
 
-     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        collectedKeys = new NetworkList<NetworkObjectReference>();
+        activatedDoors = new NetworkList<NetworkObjectReference>();
+    }
+
+    [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
     public void ActivateDoorServerRpc(NetworkObjectReference doorRef)
     {
-        if (!IsServer) return;
-        
-        // Prüfe ob bereits aktiviert
+        if (!IsServer)
+            return;
+
+        // Check if already activated
         foreach (var activatedDoor in activatedDoors)
         {
             if (activatedDoor.Equals(doorRef))
-                return; // Bereits aktiviert
+                return; // Already activated
         }
-        
-        // Füge zur Liste hinzu
+
+        // Add to list
         activatedDoors.Add(doorRef);
-        Debug.Log($"Server: Door activated. Total: {activatedDoors.Count}/{allDoors.Count}");
 
-
-        
-        // Prüfe ob alle Türen aktiviert sind
+        // Check if all doors are activated
         if (activatedDoors.Count >= allDoors.Count)
         {
             TriggerOpenGateClientRpc();
         }
 
-         if (doorRef.TryGet(out NetworkObject doorNetObj))
+        if (doorRef.TryGet(out NetworkObject doorNetObj))
         {
             GameObject activatedDoorObj = doorNetObj.gameObject;
-            
+
             foreach (var mapping in levelMappings)
             {
                 if (mapping.triggerDoor == activatedDoorObj)
                 {
-                    Debug.Log($"Triggering doors for level: {mapping.levelName}");
                     TriggerSpecificDoorsClientRpc(GetNetworkReferences(mapping.targetDoors));
                     break;
                 }
@@ -85,10 +81,10 @@ public class ItemManager : NetworkBehaviour
         }
     }
 
-     private NetworkObjectReference[] GetNetworkReferences(GameObject[] gameObjects)
+    private NetworkObjectReference[] GetNetworkReferences(GameObject[] gameObjects)
     {
         List<NetworkObjectReference> refs = new List<NetworkObjectReference>();
-        
+
         foreach (var go in gameObjects)
         {
             if (go != null)
@@ -100,16 +96,13 @@ public class ItemManager : NetworkBehaviour
                 }
             }
         }
-        
+
         return refs.ToArray();
     }
-
 
     [Rpc(SendTo.Everyone)]
     private void TriggerSpecificDoorsClientRpc(NetworkObjectReference[] targetDoorRefs)
     {
-        Debug.Log($"Activating {targetDoorRefs.Length} specific doors on client");
-        
         foreach (var doorRef in targetDoorRefs)
         {
             if (doorRef.TryGet(out NetworkObject doorNetObj))
@@ -118,29 +111,25 @@ public class ItemManager : NetworkBehaviour
                 if (doorItem != null)
                 {
                     doorItem.ChangeDoorToActive();
-                    Debug.Log($"Activated door: {doorNetObj.gameObject.name}");
                 }
             }
         }
     }
 
-     [Rpc(SendTo.Everyone)]
+    [Rpc(SendTo.Everyone)]
     private void TriggerOpenGateClientRpc()
     {
-        Debug.Log("All doors activated! Triggering gate opening on all clients...");
-        
-        // Finde alle Items mit Gates und öffne sie
+        // Find all items with gates and open them
         Item[] allItems = FindObjectsByType<Item>(FindObjectsSortMode.None);
         foreach (Item item in allItems)
         {
             if (item.gateToOpen != null)
             {
-                item.OpenGate(); 
+                item.OpenGate();
             }
         }
     }
 
-   
     public void ActivateDoorClient()
     {
         Item[] allItems = FindObjectsByType<Item>(FindObjectsSortMode.None);
@@ -148,47 +137,47 @@ public class ItemManager : NetworkBehaviour
         {
             if (item.activatedDoor != null)
             {
-                item.ChangeDoorToActive(); 
+                item.ChangeDoorToActive();
             }
         }
     }
 
     [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
-public void CollectKeyServerRpc(NetworkObjectReference keyRef)
-{
-    if (!IsServer) return;
-    
-    // Prüfe ob Key bereits gesammelt
-    foreach (var collectedKey in collectedKeys)
+    public void CollectKeyServerRpc(NetworkObjectReference keyRef)
     {
-        if (collectedKey.Equals(keyRef))
+        if (!IsServer)
             return;
-    }
-    
-    // Füge Key hinzu
-    collectedKeys.Add(keyRef);
-    isKeyCollected.Value = true;
-    
-    Debug.Log($"Server: Key collected. Total keys: {collectedKeys.Count}");
-}
 
-// Prüfe ob Key gesammelt wurde
-public bool HasKey(GameObject keyGameObject)
-{
-    if (keyGameObject == null) return false;
-    
-    var keyNetObj = keyGameObject.GetComponent<NetworkObject>();
-    if (keyNetObj == null) return false;
-    
-    NetworkObjectReference keyRef = keyNetObj;
-    
-    foreach (var collectedKey in collectedKeys)
+        // Check if key is already collected
+        foreach (var collectedKey in collectedKeys)
+        {
+            if (collectedKey.Equals(keyRef))
+                return;
+        }
+
+        // Add key
+        collectedKeys.Add(keyRef);
+        isKeyCollected.Value = true;
+    }
+
+    // Check if key was collected
+    public bool HasKey(GameObject keyGameObject)
     {
-        if (collectedKey.Equals(keyRef))
-            return true;
-    }
-    
-    return false;
-}
+        if (keyGameObject == null)
+            return false;
 
+        var keyNetObj = keyGameObject.GetComponent<NetworkObject>();
+        if (keyNetObj == null)
+            return false;
+
+        NetworkObjectReference keyRef = keyNetObj;
+
+        foreach (var collectedKey in collectedKeys)
+        {
+            if (collectedKey.Equals(keyRef))
+                return true;
+        }
+
+        return false;
+    }
 }

@@ -16,7 +16,8 @@ public class DoorController : MonoBehaviour
     {
         closedPos = transform.localPosition;
         openPos = closedPos + Vector3.up * openDistance;
-        if (startOpen) transform.localPosition = openPos;
+        if (startOpen)
+            transform.localPosition = openPos;
     }
 
     public void Open()
@@ -31,7 +32,8 @@ public class DoorController : MonoBehaviour
 
     private void StartMove(Vector3 target)
     {
-        if (moveRoutine != null) StopCoroutine(moveRoutine);
+        if (moveRoutine != null)
+            StopCoroutine(moveRoutine);
         moveRoutine = StartCoroutine(MoveTo(target));
     }
 
@@ -39,7 +41,11 @@ public class DoorController : MonoBehaviour
     {
         while ((transform.localPosition - target).sqrMagnitude > 0.0001f)
         {
-            transform.localPosition = Vector3.MoveTowards(transform.localPosition, target, moveSpeed * Time.deltaTime);
+            transform.localPosition = Vector3.MoveTowards(
+                transform.localPosition,
+                target,
+                moveSpeed * Time.deltaTime
+            );
             yield return null;
         }
 

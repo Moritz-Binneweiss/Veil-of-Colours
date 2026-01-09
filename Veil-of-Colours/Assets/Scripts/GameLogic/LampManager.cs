@@ -4,11 +4,11 @@ using UnityEngine;
 public class LampManager : MonoBehaviour
 {
     public static LampManager Instance { get; private set; }
-    
+
     [Header("Lamp Management")]
     [SerializeField]
     private List<Lamp> allLamps = new List<Lamp>();
-    
+
     private void Awake()
     {
         if (Instance != null && Instance != this)
@@ -16,34 +16,32 @@ public class LampManager : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        
+
         Instance = this;
     }
-    
+
     private void Start()
     {
-        // Finde alle Lampen in der Szene automatisch
+        // Find all lamps in the scene automatically
         RegisterAllLampsInScene();
     }
-    
+
     public void RegisterLamp(Lamp lamp)
     {
         if (!allLamps.Contains(lamp))
         {
             allLamps.Add(lamp);
-            Debug.Log($"Registered lamp: {lamp.gameObject.name}");
         }
     }
-    
+
     public void UnregisterLamp(Lamp lamp)
     {
         if (allLamps.Contains(lamp))
         {
             allLamps.Remove(lamp);
-            Debug.Log($"Unregistered lamp: {lamp.gameObject.name}");
         }
     }
-    
+
     public void RegisterAllLampsInScene()
     {
         Lamp[] foundLamps = FindObjectsByType<Lamp>(FindObjectsSortMode.None);
@@ -51,9 +49,8 @@ public class LampManager : MonoBehaviour
         {
             RegisterLamp(lamp);
         }
-        Debug.Log($"Found and registered {foundLamps.Length} lamps in scene");
     }
-    
+
     public void ApplyColorToAllLamps()
     {
         foreach (Lamp lamp in allLamps)
@@ -64,14 +61,14 @@ public class LampManager : MonoBehaviour
             }
         }
     }
-    
+
     public List<Lamp> GetAllLamps()
     {
-        // Entferne null-Referenzen
+        // Remove null references
         allLamps.RemoveAll(lamp => lamp == null);
         return allLamps;
     }
-    
+
     public int GetLampCount()
     {
         allLamps.RemoveAll(lamp => lamp == null);

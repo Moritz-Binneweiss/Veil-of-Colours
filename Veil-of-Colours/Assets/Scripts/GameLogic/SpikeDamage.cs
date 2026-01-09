@@ -37,4 +37,4 @@ public class SpikeDamage : MonoBehaviour
 
         CheckpointManager.Instance.TeleportToLastCheckpoint(other.gameObject);
     }
-} 
+}

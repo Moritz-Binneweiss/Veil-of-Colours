@@ -13,7 +13,7 @@ public class Lamp : MonoBehaviour
 
     public float minRandomIntensity;
     public float maxRandomIntensity;
-    
+
     public float minRandomTime;
     public float maxRandomTime;
 
@@ -23,7 +23,7 @@ public class Lamp : MonoBehaviour
         [Header("Main Light")]
         public Color mainLightColor = Color.white;
         public float mainLightIntensity = 1f;
-        
+
         [Header("Flicker Light")]
         public Color flickerLightColor = Color.white;
         public float flickerLightBaseIntensity = 1f;
@@ -42,7 +42,7 @@ public class Lamp : MonoBehaviour
             LampManager.Instance.RegisterLamp(this);
         }
     }
-    
+
     // Start is called before the first frame update
     void Start()
     {
@@ -59,7 +59,7 @@ public class Lamp : MonoBehaviour
         for (; ; ) //this is while(true)
         {
             float randomIntensity = Random.Range(minRandomIntensity, maxRandomIntensity);
-            
+
             // Nutze die Base-Intensität der aktuellen Farbe als Grundlage
             int currentColorIndex = ColorManager.Instance.GetActiveColorIndex();
             if (currentColorIndex >= 0 && currentColorIndex < lampColorConfigs.Length)
@@ -80,7 +80,7 @@ public class Lamp : MonoBehaviour
     public void ApplyLampColor()
     {
         int activeColorIndex = ColorManager.Instance.GetActiveColorIndex();
-        
+
         if (activeColorIndex >= 0 && activeColorIndex < lampColorConfigs.Length)
         {
             SetLampColor(activeColorIndex);
@@ -96,14 +96,13 @@ public class Lamp : MonoBehaviour
         }
 
         LampColorData colorData = lampColorConfigs[colorIndex];
-        
+
         // Setze die Farben und Intensitäten
         mainLightComponent.color = colorData.mainLightColor;
         mainLightComponent.intensity = colorData.mainLightIntensity;
-        
+
         flickerLightComponent.color = colorData.flickerLightColor;
         flickerLightComponent.intensity = colorData.flickerLightBaseIntensity;
-        
     }
 
     // Legacy method für String-basierte Aufrufe (falls noch verwendet)
@@ -115,9 +114,9 @@ public class Lamp : MonoBehaviour
             "Red" => 1,
             "Green" => 2,
             "Yellow" => 3,
-            _ => -1
+            _ => -1,
         };
-        
+
         if (colorIndex >= 0)
         {
             SetLampColor(colorIndex);

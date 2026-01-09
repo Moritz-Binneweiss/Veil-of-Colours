@@ -1,5 +1,5 @@
-using UnityEngine;
 using Unity.Netcode;
+using UnityEngine;
 
 public class PressurePlateManager : NetworkBehaviour
 {
@@ -14,7 +14,8 @@ public class PressurePlateManager : NetworkBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this) Destroy(gameObject);
+        if (Instance != null && Instance != this)
+            Destroy(gameObject);
         Instance = this;
     }
 
@@ -29,12 +30,15 @@ public class PressurePlateManager : NetworkBehaviour
         for (int i = 0; i < plateObjects.Length; i++)
         {
             var go = plateObjects[i];
-            if (go == null) continue;
+            if (go == null)
+                continue;
 
             var plate = go.GetComponent<PressurePlate>();
             if (plate == null)
             {
-                Debug.LogWarning($"PressurePlate component missing on plateObjects[{i}] ({go.name}).");
+                Debug.LogWarning(
+                    $"PressurePlate component missing on plateObjects[{i}] ({go.name})."
+                );
                 continue;
             }
 
@@ -49,7 +53,8 @@ public class PressurePlateManager : NetworkBehaviour
         if (plateStates == null || plateStates.Length != plates.Length)
         {
             plateStates = new bool[plates.Length];
-            for (int i = 0; i < plateStates.Length; i++) plateStates[i] = false;
+            for (int i = 0; i < plateStates.Length; i++)
+                plateStates[i] = false;
         }
     }
 
@@ -57,16 +62,20 @@ public class PressurePlateManager : NetworkBehaviour
     public void RequestActivatePlate(int id, bool pressed)
     {
         EnsureStateArray();
-        if (id < 0 || id >= plates.Length) return;
+        if (id < 0 || id >= plates.Length)
+            return;
 
-        if (IsServer) ActivatePlateServer(id, pressed);
-        else ActivatePlateServerRpc(id, pressed);
+        if (IsServer)
+            ActivatePlateServer(id, pressed);
+        else
+            ActivatePlateServerRpc(id, pressed);
     }
 
     // Neue Überladung: Anfrage per Plate-GameObject -> find index -> weiterleiten
     public void RequestActivatePlate(GameObject plateGO, bool pressed)
     {
-        if (plateGO == null) return;
+        if (plateGO == null)
+            return;
         int id = -1;
         for (int i = 0; i < plateObjects.Length; i++)
         {
@@ -77,7 +86,8 @@ public class PressurePlateManager : NetworkBehaviour
             }
         }
 
-        if (id == -1) return;
+        if (id == -1)
+            return;
         RequestActivatePlate(id, pressed);
     }
 
@@ -89,10 +99,12 @@ public class PressurePlateManager : NetworkBehaviour
 
     private void ActivatePlateServer(int id, bool pressed)
     {
-        if (id < 0 || id >= plates.Length) return;
+        if (id < 0 || id >= plates.Length)
+            return;
         EnsureStateArray();
 
-        if (plateStates[id] == pressed) return;
+        if (plateStates[id] == pressed)
+            return;
 
         plateStates[id] = pressed;
         ActivatePlateClientRpc(id, pressed);
@@ -101,7 +113,8 @@ public class PressurePlateManager : NetworkBehaviour
     [ClientRpc]
     private void ActivatePlateClientRpc(int id, bool pressed)
     {
-        if (id < 0 || id >= plates.Length) return;
+        if (id < 0 || id >= plates.Length)
+            return;
         plates[id]?.ActivateLocal(pressed);
         ApplyDoorStateLocal(id, pressed);
     }
@@ -109,13 +122,18 @@ public class PressurePlateManager : NetworkBehaviour
     // Verwendet nur die doorObjects-Referenz, die im Manager im Inspector gesetzt wird
     public void ApplyDoorStateLocal(int id, bool pressed)
     {
-        if (id < 0 || id >= doorObjects.Length) return;
+        if (id < 0 || id >= doorObjects.Length)
+            return;
         var doorGo = doorObjects[id];
-        if (doorGo == null) return;
+        if (doorGo == null)
+            return;
         var door = doorGo.GetComponent<DoorController>();
-        if (door == null) return;
+        if (door == null)
+            return;
 
-        if (pressed) door.Open();
-        else door.Close();
+        if (pressed)
+            door.Open();
+        else
+            door.Close();
     }
 }

@@ -7,6 +7,7 @@ public class PressurePlate : MonoBehaviour
     public Tilemap pressurePlate;
     public float pressDepth = 0.15f;
     public float moveSpeed = 4f;
+
     [Tooltip("Maximale Strecke, die die Platte bewegen darf")]
     public float maxMovementDistance = 0.2f;
 
@@ -30,7 +31,11 @@ public class PressurePlate : MonoBehaviour
     private void Update()
     {
         Vector3 previousWorldPos = plateTransform.position;
-        Vector3 newLocalPos = Vector3.MoveTowards(plateTransform.localPosition, targetLocalPos, moveSpeed * Time.deltaTime);
+        Vector3 newLocalPos = Vector3.MoveTowards(
+            plateTransform.localPosition,
+            targetLocalPos,
+            moveSpeed * Time.deltaTime
+        );
 
         float distanceFromStart = Vector3.Distance(newLocalPos, startLocalPos);
 
@@ -60,7 +65,8 @@ public class PressurePlate : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         playerOnPlate = true;
         playerOnPlatform = other.transform;
@@ -79,7 +85,8 @@ public class PressurePlate : MonoBehaviour
 
     private void OnTriggerExit2D(Collider2D other)
     {
-        if (!other.CompareTag("Player")) return;
+        if (!other.CompareTag("Player"))
+            return;
 
         playerOnPlate = false;
         playerOnPlatform = null;

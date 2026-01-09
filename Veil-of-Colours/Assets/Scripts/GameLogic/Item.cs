@@ -1,30 +1,25 @@
-using UnityEngine;
-using UnityEngine.Events;
 using System.Collections.Generic;
-using UnityEngine.Rendering.Universal;
 using Unity.Netcode;
 using UnityEditor;
+using UnityEngine;
+using UnityEngine.Events;
+using UnityEngine.Rendering.Universal;
 using VeilOfColours.General;
 
 public class Item : NetworkBehaviour
 {
-
     [Header("Item Configuration")]
     [SerializeField]
     private ItemType itemType;
 
     [Header("Door Configuration")]
     [SerializeField]
-    private GameObject requiredKeyGameObject; // Welcher Key wird benötigt (für Doors)
-
+    private GameObject requiredKeyGameObject; // Which key is required (for doors)
 
     [Header("Events")]
     public UnityEvent OnUse;
 
-
     private bool isDoorActive;
-
-    
 
     public Sprite openLock;
 
@@ -40,25 +35,17 @@ public class Item : NetworkBehaviour
 
     public float moveSpeed = 2f;
 
-    
-
     public enum ItemType
     {
         Key,
-        Door
+        Door,
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
-    {
-
-    }
+    void Start() { }
 
     // Update is called once per frame
-    void Update()
-    {
-
-    }
+    void Update() { }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
@@ -71,79 +58,71 @@ public class Item : NetworkBehaviour
                 break;
             case ItemType.Door:
                 TryOpenDoor();
-                Debug.Log("Player tried to open door.");
                 break;
         }
     }
 
     [ContextMenu("Collect Key (Editor)")]
     public void CollectKey()
-    {if (Application.isPlaying && NetworkManager.Singleton != null)
     {
-        // Netzwerk-Version
-        var keyNetObj = gameObject.GetComponent<NetworkObject>();
-        if (keyNetObj != null)
+        if (Application.isPlaying && NetworkManager.Singleton != null)
         {
-            NetworkObjectReference keyRef = keyNetObj;
-            ItemManager.Instance.CollectKeyServerRpc(keyRef);
-            gameObject.SetActive(false);
+            // Network version
+            var keyNetObj = gameObject.GetComponent<NetworkObject>();
+            if (keyNetObj != null)
+            {
+                NetworkObjectReference keyRef = keyNetObj;
+                ItemManager.Instance.CollectKeyServerRpc(keyRef);
+                gameObject.SetActive(false);
+            }
+            else
+            {
+                Debug.LogError("Key GameObject needs NetworkObject for multiplayer!");
+            }
         }
         else
         {
-            Debug.LogError("Key GameObject needs NetworkObject for multiplayer!");
+            gameObject.SetActive(false);
         }
-    }
-    else
-    {
-        gameObject.SetActive(false);
-    }
-    
-    Debug.Log("Key collected!");
     }
 
     [ContextMenu("Try Open Door (Editor)")]
     public void TryOpenDoor()
-    { 
-        Debug.Log("Trying to open door...");
-    if (ItemManager.Instance.HasKey(requiredKeyGameObject))
     {
-        OpenLock();
-        Debug.Log("Door opened!");
+        if (ItemManager.Instance.HasKey(requiredKeyGameObject))
+        {
+            OpenLock();
+        }
     }
-    else
-    {
-        Debug.Log("Required key not found!");
-    }
-    }
-
 
     [ContextMenu("Open Gate (Editor)")]
-public void OpenGate()
-{
-    if (gateToOpen != null)
+    public void OpenGate()
     {
-        StartCoroutine(MoveGateCoroutine());
+        if (gateToOpen != null)
+        {
+            StartCoroutine(MoveGateCoroutine());
+        }
     }
-}
 
-private System.Collections.IEnumerator MoveGateCoroutine()
-{
-    Vector3 startPosition = gateToOpen.transform.position;
-    Vector3 targetPosition = startPosition + Vector3.up * openDistance;
-    
-    while (Vector3.Distance(gateToOpen.transform.position, targetPosition) > 0.01f)
+    private System.Collections.IEnumerator MoveGateCoroutine()
     {
-        gateToOpen.transform.position = Vector3.MoveTowards(
-            gateToOpen.transform.position, 
-            targetPosition, 
-            moveSpeed * Time.deltaTime
-        );
-        yield return null; 
+        Vector3 startPosition = gateToOpen.transform.position;
+        Vector3 targetPosition = startPosition + Vector3.up * openDistance;
+
+        while (Vector3.Distance(gateToOpen.transform.position, targetPosition) > 0.01f)
+        {
+            gateToOpen.transform.position = Vector3.MoveTowards(
+                gateToOpen.transform.position,
+                targetPosition,
+                moveSpeed * Time.deltaTime
+            );
+            yield return null;
+        }
+
+        gateToOpen.transform.position = targetPosition;
+        WinGame();
     }
-    
-    gateToOpen.transform.position = targetPosition;
-    WinGame();
-}
+
     [ContextMenu("Change Door To Active (Editor)")]
     public void ChangeDoorToActive()
     {
@@ -166,9 +145,8 @@ private System.Collections.IEnumerator MoveGateCoroutine()
             {
                 spriteRenderer.sprite = openLock;
             }
-
         }
-        // Netzwerk-Benachrichtigung senden (falls NetworkObject vorhanden)
+        // Send network notification (if NetworkObject is present)
         if (ItemManager.Instance != null && Application.isPlaying)
         {
             var networkObject = GetComponent<NetworkObject>();
@@ -179,23 +157,20 @@ private System.Collections.IEnumerator MoveGateCoroutine()
             }
             else
             {
-                Debug.LogWarning($"Item {gameObject.name} hat kein NetworkObject für Netzwerk-Sync");
+                Debug.LogWarning($"Item {gameObject.name} missing NetworkObject for network sync");
             }
         }
     }
 
     public void WinGame()
     {
-        Debug.Log("Game Won!");
-         Debug.Log("Game Won!");
-    
-    if (GameManager.Instance != null)
-    {
-        GameManager.Instance.ShowVictory();
-    }
-    else
-    {
-        Debug.LogError("GameManager.Instance not found!");
-    }
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ShowVictory();
+        }
+        else
+        {
+            Debug.LogError("GameManager.Instance not found!");
+        }
     }
 }
