@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9069613033627411561}
   - component: {fileID: 813962582744355271}
+  - component: {fileID: -7240071791485134677}
   m_Layer: 0
   m_Name: Key
   m_TagString: Item
@@ -91,6 +92,34 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &-7240071791485134677
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3683629535955926307}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 753b154d570e0e447ae285b5a0338b66, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::Item
+  itemType: 0
+  keyGameObject: {fileID: 0}
+  requiredKeyGameObject: {fileID: 0}
+  doorControllers: []
+  OnKeyCollected:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDoorOpened:
+    m_PersistentCalls:
+      m_Calls: []
+  OnDoorLocked:
+    m_PersistentCalls:
+      m_Calls: []
+  isDoorActive: 0
+  openLock: {fileID: 0}
+  activatedDoor: {fileID: 0}
 --- !u!1 &6597959502041633017
 GameObject:
   m_ObjectHideFlags: 0
