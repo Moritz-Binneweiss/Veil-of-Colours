@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine.Rendering.Universal;
 using Unity.Netcode;
 using UnityEditor;
+using VeilOfColours.General;
 
 public class Item : NetworkBehaviour
 {
@@ -186,5 +187,15 @@ private System.Collections.IEnumerator MoveGateCoroutine()
     public void WinGame()
     {
         Debug.Log("Game Won!");
+         Debug.Log("Game Won!");
+    
+    if (GameManager.Instance != null)
+    {
+        GameManager.Instance.ShowVictory();
+    }
+    else
+    {
+        Debug.LogError("GameManager.Instance not found!");
+    }
     }
 }
