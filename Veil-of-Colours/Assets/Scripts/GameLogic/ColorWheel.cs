@@ -83,6 +83,19 @@ namespace VeilOfColours.GameLogic
             if (colorWheelAction == null)
                 return;
 
+            // Disable color wheel when game is paused
+            if (Time.timeScale == 0f)
+            {
+                // Close wheel if it's open when pause happens
+                if (isWheelActive)
+                {
+                    isWheelActive = false;
+                    if (colorWheelUI != null)
+                        colorWheelUI.SetActive(false);
+                }
+                return;
+            }
+
             Vector2 inputVector = colorWheelAction.action.ReadValue<Vector2>();
             float magnitude = inputVector.magnitude;
 

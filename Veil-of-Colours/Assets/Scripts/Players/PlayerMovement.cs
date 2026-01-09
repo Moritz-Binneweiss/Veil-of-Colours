@@ -30,6 +30,8 @@ namespace VeilOfColours.Players
         [SerializeField]
         private float acceleration = 50f;
 
+        private bool movementEnabled = true;
+
         [SerializeField]
         private float deceleration = 60f;
 
@@ -64,6 +66,19 @@ namespace VeilOfColours.Players
 
         [SerializeField]
         private bool dashResetOnGround = true;
+
+        [Header("Dash Feedback")]
+        [SerializeField]
+        private float dashShakeIntensity = 0.15f;
+
+        [SerializeField]
+        private float dashShakeDuration = 0.15f;
+
+        [SerializeField]
+        private float dashVibrationIntensity = 0.3f;
+
+        [SerializeField]
+        private float dashVibrationDuration = 0.15f;
 
         [Header("Climb Settings")]
         [SerializeField]
@@ -131,6 +146,10 @@ namespace VeilOfColours.Players
         [SerializeField]
         private float flipSpeed = 20f; // How fast the player flips (higher = faster)
 
+        [Header("Camera Reference")]
+        [SerializeField]
+        private CameraFollow cameraFollow;
+
         private Rigidbody2D rb;
         private Animator animator;
         private bool isGrounded;
@@ -173,6 +192,12 @@ namespace VeilOfColours.Players
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             rb.gravityScale = 3;
             currentClimbStamina = maxClimbStamina;
+
+            // Find camera if not assigned
+            if (cameraFollow == null)
+            {
+                cameraFollow = FindFirstObjectByType<CameraFollow>();
+            }
         }
 
         public override void OnNetworkSpawn()
@@ -180,6 +205,22 @@ namespace VeilOfColours.Players
             base.OnNetworkSpawn();
 
             Debug.Log($"PlayerMovement spawned. ClientId: {OwnerClientId}, IsOwner: {IsOwner}");
+        }
+
+        public void FreezeMovementForDuration(float duration)
+        {
+            if (gameObject.activeInHierarchy)
+            {
+                StartCoroutine(FreezeMovementCoroutine(duration));
+            }
+        }
+
+        private System.Collections.IEnumerator FreezeMovementCoroutine(float duration)
+        {
+            movementEnabled = false;
+            rb.linearVelocity = Vector2.zero;
+            yield return new WaitForSeconds(duration);
+            movementEnabled = true;
         }
 
         private void OnEnable()
@@ -215,6 +256,9 @@ namespace VeilOfColours.Players
         private void Update()
         {
             if (!IsOwner)
+                return;
+
+            if (!movementEnabled)
                 return;
 
             ReadInput();
@@ -303,6 +347,12 @@ namespace VeilOfColours.Players
         {
             if (!IsOwner)
                 return;
+
+            if (!movementEnabled)
+            {
+                rb.linearVelocity = Vector2.zero;
+                return;
+            }
 
             wasGrounded = isGrounded;
             CheckGroundState();
@@ -539,6 +589,19 @@ namespace VeilOfColours.Players
 
             // Cancel current velocity for clean dash
             rb.linearVelocity = Vector2.zero;
+
+            // Apply camera shake and gamepad vibration (only for local player)
+            if (IsOwner)
+            {
+                // Trigger camera shake
+                if (cameraFollow != null)
+                {
+                    cameraFollow.TriggerShake(dashShakeIntensity, dashShakeDuration);
+                }
+
+                // Trigger gamepad vibration
+                TriggerGamepadVibration(dashVibrationIntensity, dashVibrationDuration);
+            }
         }
 
         private void HandleDash()
@@ -766,6 +829,24 @@ namespace VeilOfColours.Players
         public float GetCurrentClimbStamina()
         {
             return currentClimbStamina;
+        }
+
+        private void TriggerGamepadVibration(float intensity, float duration)
+        {
+            if (Gamepad.current != null)
+            {
+                Gamepad.current.SetMotorSpeeds(intensity, intensity);
+                StartCoroutine(StopVibrationAfterDelay(duration));
+            }
+        }
+
+        private System.Collections.IEnumerator StopVibrationAfterDelay(float delay)
+        {
+            yield return new WaitForSeconds(delay);
+            if (Gamepad.current != null)
+            {
+                Gamepad.current.SetMotorSpeeds(0, 0);
+            }
         }
     }
 }
