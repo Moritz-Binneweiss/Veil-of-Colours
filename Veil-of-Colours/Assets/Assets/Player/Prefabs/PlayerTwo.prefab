@@ -915,7 +915,7 @@ GameObject:
   - component: {fileID: 7653657506260876698}
   m_Layer: 0
   m_Name: PlayerTwo
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1021,6 +1021,7 @@ MonoBehaviour:
   dashDuration: 0.25
   dashCooldown: 0.5
   dashResetOnGround: 1
+  dashTrail: {fileID: 0}
   climbSpeed: 5
   maxClimbStamina: 100
   climbStaminaDrainRate: 40

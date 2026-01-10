@@ -65,6 +65,9 @@ namespace VeilOfColours.Players
         [SerializeField]
         private bool dashResetOnGround = true;
 
+        [SerializeField]
+        private TrailRenderer dashTrail;
+
         [Header("Climb Settings")]
         [SerializeField]
         private float climbSpeed = 5f;
@@ -150,9 +153,6 @@ namespace VeilOfColours.Players
         private bool hasAirDash = true; // Track if air dash is available
         private float dashTimeLeft;
         private float dashCooldownTimer;
-        private float lastImageXPos;
-        private float lastDash = -100f;
-        public float distanceBetweenImages;
         private Vector2 dashDirection;
 
         // Climb state
@@ -173,6 +173,7 @@ namespace VeilOfColours.Players
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             rb.gravityScale = 3;
             currentClimbStamina = maxClimbStamina;
+
         }
 
         public override void OnNetworkSpawn()
@@ -239,20 +240,33 @@ namespace VeilOfColours.Players
             }
 
             // Jump buffer
-            if (jumpAction != null && jumpAction.action.WasPressedThisFrame())
+            if (jumpAction != null && jumpAction.action != null)
             {
-                jumpBufferCounter = jumpBufferTime;
-            }
+                if (jumpAction.action.WasPressedThisFrame())
+                {
+                    Debug.Log($"[Player {OwnerClientId}] JUMP PRESSED! Buffer set to {jumpBufferTime}");
+                    jumpBufferCounter = jumpBufferTime;
+                }
 
-            if (jumpAction != null && jumpAction.action.WasReleasedThisFrame())
+                if (jumpAction.action.WasReleasedThisFrame())
+                {
+                    Debug.Log($"[Player {OwnerClientId}] Jump released");
+                    jumpReleased = true;
+                }
+            }
+            else
             {
-                jumpReleased = true;
+                Debug.LogWarning($"[Player {OwnerClientId}] jumpAction is null!");
             }
 
             // Dash input
-            if (dashAction != null && dashAction.action.WasPressedThisFrame() && canDash)
+            if (dashAction != null && dashAction.action.WasPressedThisFrame())
             {
-                StartDash();
+                Debug.Log($"[Player {OwnerClientId}] Dash pressed! canDash={canDash}");
+                if (canDash)
+                {
+                    StartDash();
+                }
             }
 
             // Climb input
@@ -524,12 +538,8 @@ namespace VeilOfColours.Players
             dashDirection = inputDirection.normalized;
             isDashing = true;
             dashTimeLeft = dashDuration;
-            lastDash = Time.time;
             canDash = false;
             dashCooldownTimer = dashCooldown;
-
-            DashAfterImage.Instance.GetFromPool();
-            lastImageXPos = transform.position.x;
 
             // Use up air dash if in air
             if (!isGrounded)
@@ -539,6 +549,12 @@ namespace VeilOfColours.Players
 
             // Cancel current velocity for clean dash
             rb.linearVelocity = Vector2.zero;
+
+            // Aktiviere Trail während Dash
+            if (dashTrail != null)
+            {
+                dashTrail.emitting = true;
+            }
         }
 
         private void HandleDash()
@@ -550,18 +566,17 @@ namespace VeilOfColours.Players
                 isDashing = false;
                 // Small velocity preservation at end of dash
                 rb.linearVelocity = dashDirection * dashSpeed * 0.3f;
+
+                // Deaktiviere Trail wenn Dash endet
+                if (dashTrail != null)
+                {
+                    dashTrail.emitting = false;
+                }
                 return;
             }
 
             // Apply dash velocity (ignore gravity during dash)
             rb.linearVelocity = dashDirection * dashSpeed;
-
-            // Spawn after images during dash
-            if (Mathf.Abs(transform.position.x - lastImageXPos) > distanceBetweenImages)
-            {
-                DashAfterImage.Instance.GetFromPool();
-                lastImageXPos = transform.position.x;
-            }
         }
 
         private void TryStartClimb()

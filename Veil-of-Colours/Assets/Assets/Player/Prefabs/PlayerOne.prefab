@@ -916,7 +916,7 @@ GameObject:
   - component: {fileID: 6479326836676515275}
   m_Layer: 0
   m_Name: PlayerOne
-  m_TagString: Player
+  m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1022,6 +1022,7 @@ MonoBehaviour:
   dashDuration: 0.25
   dashCooldown: 0.5
   dashResetOnGround: 1
+  dashTrail: {fileID: 0}
   climbSpeed: 5
   maxClimbStamina: 100
   climbStaminaDrainRate: 40
@@ -1043,7 +1044,6 @@ MonoBehaviour:
   wallCheckFront: {fileID: 142691690444496801}
   wallCheckDistance: 0.5
   flipSpeed: 40
-  distanceBetweenImages: 0.1
 --- !u!114 &3044659649591904390
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1358,7 +1358,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 87154501
-  m_SortingLayer: 1
+  m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: ecefb04ef14ed5941b15570a8061dcf4, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
