@@ -70,6 +70,19 @@ namespace VeilOfColours.Players
         [SerializeField]
         private TrailRenderer dashTrail;
 
+        [Header("Dash Feedback")]
+        [SerializeField]
+        private float dashShakeIntensity = 0.15f;
+
+        [SerializeField]
+        private float dashShakeDuration = 0.15f;
+
+        [SerializeField]
+        private float dashVibrationIntensity = 0.3f;
+
+        [SerializeField]
+        private float dashVibrationDuration = 0.15f;
+
         [Header("Climb Settings")]
         [SerializeField]
         private float climbSpeed = 5f;
@@ -274,7 +287,9 @@ namespace VeilOfColours.Players
             {
                 if (jumpAction.action.WasPressedThisFrame())
                 {
-                    Debug.Log($"[Player {OwnerClientId}] JUMP PRESSED! Buffer set to {jumpBufferTime}");
+                    Debug.Log(
+                        $"[Player {OwnerClientId}] JUMP PRESSED! Buffer set to {jumpBufferTime}"
+                    );
                     jumpBufferCounter = jumpBufferTime;
                 }
 
@@ -590,18 +605,18 @@ namespace VeilOfColours.Players
             if (dashTrail != null)
             {
                 dashTrail.emitting = true;
-            // Apply camera shake and gamepad vibration (only for local player)
-            if (IsOwner)
-            {
-                // Trigger camera shake
-                if (cameraFollow != null)
+                // Apply camera shake and gamepad vibration (only for local player)
+                if (IsOwner)
                 {
-                    cameraFollow.TriggerShake(dashShakeIntensity, dashShakeDuration);
-                }
+                    // Trigger camera shake
+                    if (cameraFollow != null)
+                    {
+                        cameraFollow.TriggerShake(dashShakeIntensity, dashShakeDuration);
+                    }
 
-                // Trigger gamepad vibration
-                TriggerGamepadVibration(dashVibrationIntensity, dashVibrationDuration);
-            }
+                    // Trigger gamepad vibration
+                    TriggerGamepadVibration(dashVibrationIntensity, dashVibrationDuration);
+                }
             }
         }
 

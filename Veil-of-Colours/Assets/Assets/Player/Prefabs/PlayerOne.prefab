@@ -955,7 +955,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d5a57f767e5e46a458fc5d3c628d0cbb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Unity.Netcode.Runtime::Unity.Netcode.NetworkObject
-  GlobalObjectIdHash: 1149631062
+  GlobalObjectIdHash: 1712035735
   InScenePlacedSourceGlobalObjectIdHash: 0
   DeferredDespawnTick: 0
   Ownership: 1
@@ -1024,6 +1024,7 @@ MonoBehaviour:
   dashDuration: 0.25
   dashCooldown: 0.5
   dashResetOnGround: 1
+  dashTrail: {fileID: 0}
   dashShakeIntensity: 0.15
   dashShakeDuration: 0.15
   dashVibrationIntensity: 0.3
@@ -1050,7 +1051,6 @@ MonoBehaviour:
   wallCheckDistance: 0.5
   flipSpeed: 40
   cameraFollow: {fileID: 2473705448982396736}
-  distanceBetweenImages: 0.1
 --- !u!114 &3044659649591904390
 MonoBehaviour:
   m_ObjectHideFlags: 0
