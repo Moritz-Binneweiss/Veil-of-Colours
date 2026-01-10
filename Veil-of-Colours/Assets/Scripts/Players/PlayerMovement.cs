@@ -205,6 +205,37 @@ namespace VeilOfColours.Players
             base.OnNetworkSpawn();
 
             Debug.Log($"PlayerMovement spawned. ClientId: {OwnerClientId}, IsOwner: {IsOwner}");
+
+            // Enable input actions for owner
+            if (IsOwner)
+            {
+                if (moveAction != null)
+                    moveAction.action.Enable();
+                if (jumpAction != null)
+                    jumpAction.action.Enable();
+                if (dashAction != null)
+                    dashAction.action.Enable();
+                if (climbAction != null)
+                    climbAction.action.Enable();
+            }
+        }
+
+        public override void OnNetworkDespawn()
+        {
+            base.OnNetworkDespawn();
+
+            // Disable input actions
+            if (IsOwner)
+            {
+                if (moveAction != null)
+                    moveAction.action.Disable();
+                if (jumpAction != null)
+                    jumpAction.action.Disable();
+                if (dashAction != null)
+                    dashAction.action.Disable();
+                if (climbAction != null)
+                    climbAction.action.Disable();
+            }
         }
 
         public void FreezeMovementForDuration(float duration)
@@ -221,36 +252,6 @@ namespace VeilOfColours.Players
             rb.linearVelocity = Vector2.zero;
             yield return new WaitForSeconds(duration);
             movementEnabled = true;
-        }
-
-        private void OnEnable()
-        {
-            if (!IsOwner)
-                return;
-
-            if (moveAction != null)
-                moveAction.action.Enable();
-            if (jumpAction != null)
-                jumpAction.action.Enable();
-            if (dashAction != null)
-                dashAction.action.Enable();
-            if (climbAction != null)
-                climbAction.action.Enable();
-        }
-
-        private void OnDisable()
-        {
-            if (!IsOwner)
-                return;
-
-            if (moveAction != null)
-                moveAction.action.Disable();
-            if (jumpAction != null)
-                jumpAction.action.Disable();
-            if (dashAction != null)
-                dashAction.action.Disable();
-            if (climbAction != null)
-                climbAction.action.Disable();
         }
 
         private void Update()
@@ -287,15 +288,11 @@ namespace VeilOfColours.Players
             {
                 if (jumpAction.action.WasPressedThisFrame())
                 {
-                    Debug.Log(
-                        $"[Player {OwnerClientId}] JUMP PRESSED! Buffer set to {jumpBufferTime}"
-                    );
                     jumpBufferCounter = jumpBufferTime;
                 }
 
                 if (jumpAction.action.WasReleasedThisFrame())
                 {
-                    Debug.Log($"[Player {OwnerClientId}] Jump released");
                     jumpReleased = true;
                 }
             }
@@ -363,14 +360,16 @@ namespace VeilOfColours.Players
             if (!IsOwner)
                 return;
 
+            wasGrounded = isGrounded;
+            CheckGroundState();
+
             if (!movementEnabled)
             {
                 rb.linearVelocity = Vector2.zero;
+                // Update animation even when movement is disabled
+                UpdateAnimation();
                 return;
             }
-
-            wasGrounded = isGrounded;
-            CheckGroundState();
 
             // Check for wall jump FIRST (before any other state)
             if (jumpBufferCounter > 0f && (isClimbing || isWallSliding) && isTouchingWall)
@@ -517,7 +516,10 @@ namespace VeilOfColours.Players
         private void UpdateAnimation()
         {
             if (animator == null)
+            {
+                Debug.LogWarning("Animator is null!");
                 return;
+            }
 
             // Set animation states based on priority
             animator.SetBool("isDashing", isDashing);
