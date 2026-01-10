@@ -193,8 +193,22 @@ namespace VeilOfColours.General
             if (gameUICanvas != null)
                 gameUICanvas.SetActive(!paused);
 
-            if (pauseUICanvas != null)
-                pauseUICanvas.SetActive(paused);
+            if (pauseUICanvas != null){
+                    pauseUICanvas.SetActive(paused);
+                    SetAllChildrenActive(pauseUICanvas, paused);   
+                }
+              
+        }
+
+        private void SetAllChildrenActive(GameObject parent, bool active)
+        {
+            if (parent == null)
+                return;
+
+            foreach (Transform child in parent.transform)
+            {
+                child.gameObject.SetActive(active);
+            }
         }
 
         // ==================== GAME OVER ====================

@@ -59,6 +59,25 @@ namespace VeilOfColours.Players
                 targetPos.z = offset.z;
                 transform.position = targetPos;
             }
+
+            // Disable all other cameras before setting this as main
+            Camera[] allCameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
+            Camera thisCam = GetComponent<Camera>();
+
+            if (thisCam != null)
+            {
+                foreach (Camera cam in allCameras)
+                {
+                    if (cam != thisCam)
+                    {
+                        cam.enabled = false;
+                    }
+                }
+
+                // Enable and set this camera as the main camera
+                thisCam.enabled = true;
+                thisCam.tag = "MainCamera";
+            }
         }
 
         private void LateUpdate()
@@ -119,16 +138,19 @@ namespace VeilOfColours.Players
                 ? smoothTime
                 : (smoothTime * (1f / recenterSpeed));
 
-            // Update camera shake
-            UpdateShake();
-
-            // Smooth follow with shake offset
-            transform.position = Vector3.SmoothDamp(
+            // Smooth follow WITHOUT shake (shake applied after)
+            Vector3 smoothPosition = Vector3.SmoothDamp(
                 transform.position,
-                desiredPosition + shakeOffset,
+                desiredPosition,
                 ref velocity,
                 currentSmoothTime
             );
+
+            // Update camera shake
+            UpdateShake();
+
+            // Apply shake AFTER smoothing for instant effect
+            transform.position = smoothPosition + shakeOffset;
         }
 
         public void SetTarget(Transform newTarget)
