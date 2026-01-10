@@ -638,18 +638,24 @@ namespace VeilOfColours.Players
             if (dashTrail != null)
             {
                 dashTrail.emitting = true;
-                // Apply camera shake and gamepad vibration (only for local player)
-                if (IsOwner)
-                {
-                    // Trigger camera shake
-                    if (cameraFollow != null)
-                    {
-                        cameraFollow.TriggerShake(dashShakeIntensity, dashShakeDuration);
-                    }
+            }
 
-                    // Trigger gamepad vibration
-                    TriggerGamepadVibration(dashVibrationIntensity, dashVibrationDuration);
+            // Apply camera shake and gamepad vibration (only for local player)
+            if (IsOwner)
+            {
+                // Trigger camera shake - find camera if not set
+                if (cameraFollow == null)
+                {
+                    cameraFollow = FindFirstObjectByType<CameraFollow>();
                 }
+
+                if (cameraFollow != null)
+                {
+                    cameraFollow.TriggerShake(dashShakeIntensity, dashShakeDuration);
+                }
+
+                // Trigger gamepad vibration
+                TriggerGamepadVibration(dashVibrationIntensity, dashVibrationDuration);
             }
         }
 
