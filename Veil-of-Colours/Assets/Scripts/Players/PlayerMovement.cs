@@ -169,9 +169,7 @@ namespace VeilOfColours.Players
         private bool hasAirDash = true; // Track if air dash is available
         private float dashTimeLeft;
         private float dashCooldownTimer;
-        private float lastImageXPos;
         private float lastDash = -100f;
-        public float distanceBetweenImages;
         private Vector2 dashDirection;
 
         // Climb state
@@ -578,9 +576,6 @@ namespace VeilOfColours.Players
             canDash = false;
             dashCooldownTimer = dashCooldown;
 
-            DashAfterImage.Instance.GetFromPool();
-            lastImageXPos = transform.position.x;
-
             // Use up air dash if in air
             if (!isGrounded)
             {
@@ -618,13 +613,6 @@ namespace VeilOfColours.Players
 
             // Apply dash velocity (ignore gravity during dash)
             rb.linearVelocity = dashDirection * dashSpeed;
-
-            // Spawn after images during dash
-            if (Mathf.Abs(transform.position.x - lastImageXPos) > distanceBetweenImages)
-            {
-                DashAfterImage.Instance.GetFromPool();
-                lastImageXPos = transform.position.x;
-            }
         }
 
         private void TryStartClimb()

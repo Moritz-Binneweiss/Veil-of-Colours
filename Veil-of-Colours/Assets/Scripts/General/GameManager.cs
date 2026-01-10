@@ -50,18 +50,6 @@ namespace VeilOfColours.General
             Instance = this;
         }
 
-        private void OnEnable()
-        {
-            if (pauseAction != null)
-                pauseAction.action.Enable();
-        }
-
-        private void OnDisable()
-        {
-            if (pauseAction != null)
-                pauseAction.action.Disable();
-        }
-
         private void Start()
         {
             SubscribeToNetworkEvents();
@@ -85,8 +73,12 @@ namespace VeilOfColours.General
 
         private void Update()
         {
-            // Check for pause input from any owner
-            if (IsClient && pauseAction != null && pauseAction.action.WasPressedThisFrame())
+            // Prevent pausing during player connection
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+                return;
+
+            // Check for pause input - any player can pause
+            if (pauseAction != null && pauseAction.action.WasPressedThisFrame())
             {
                 if (isPaused.Value)
                 {
@@ -192,6 +184,7 @@ namespace VeilOfColours.General
 
         private void UpdateUIState(bool paused)
         {
+            // Use unscaled time to prevent blocking network updates
             Time.timeScale = paused ? 0f : 1f;
 
             if (gameUICanvas != null)

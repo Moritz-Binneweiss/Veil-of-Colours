@@ -15,7 +15,6 @@ public class PressurePlate : MonoBehaviour
     private Vector3 startLocalPos;
     private Vector3 pressedLocalPos;
     private Vector3 targetLocalPos;
-    private bool playerOnPlate = false;
     private bool hasMovedTooFar = false;
 
     private Transform playerOnPlatform = null;
@@ -68,7 +67,6 @@ public class PressurePlate : MonoBehaviour
         if (!other.CompareTag("Player"))
             return;
 
-        playerOnPlate = true;
         playerOnPlatform = other.transform;
 
         var mgr = PressurePlateManager.Instance;
@@ -88,7 +86,6 @@ public class PressurePlate : MonoBehaviour
         if (!other.CompareTag("Player"))
             return;
 
-        playerOnPlate = false;
         playerOnPlatform = null;
 
         var mgr = PressurePlateManager.Instance;

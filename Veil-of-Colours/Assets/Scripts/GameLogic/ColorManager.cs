@@ -98,6 +98,37 @@ namespace VeilOfColours.GameLogic
             activeColorIndex.Value = colorIndex;
         }
 
+        public void RequestColorPreview(int colorIndex)
+        {
+            if (!IsServer && !IsHost)
+            {
+                RequestColorPreviewServerRpc(colorIndex);
+            }
+            else
+            {
+                ApplyColorPreviewClientRpc(colorIndex);
+            }
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void RequestColorPreviewServerRpc(int colorIndex)
+        {
+            ApplyColorPreviewClientRpc(colorIndex);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        private void ApplyColorPreviewClientRpc(int colorIndex)
+        {
+            // Apply visual preview without changing the actual active color
+            ApplyColorLayer(colorIndex);
+
+            // Also update lamp colors for preview with specific color index
+            if (LampManager.Instance != null)
+            {
+                LampManager.Instance.ApplyColorToAllLamps(colorIndex);
+            }
+        }
+
         private void ApplyColorLayer(int colorIndex)
         {
             if (colorGroups == null || colorIndex < 0 || colorIndex >= colorGroups.Length)

@@ -62,6 +62,17 @@ public class LampManager : MonoBehaviour
         }
     }
 
+    public void ApplyColorToAllLamps(int colorIndex)
+    {
+        foreach (Lamp lamp in allLamps)
+        {
+            if (lamp != null)
+            {
+                lamp.SetLampColor(colorIndex);
+            }
+        }
+    }
+
     public List<Lamp> GetAllLamps()
     {
         // Remove null references
