@@ -67,6 +67,9 @@ namespace VeilOfColours.Players
         [SerializeField]
         private bool dashResetOnGround = true;
 
+        [SerializeField]
+        private TrailRenderer dashTrail;
+
         [Header("Dash Feedback")]
         [SerializeField]
         private float dashShakeIntensity = 0.15f;
@@ -169,12 +172,11 @@ namespace VeilOfColours.Players
         private bool hasAirDash = true; // Track if air dash is available
         private float dashTimeLeft;
         private float dashCooldownTimer;
-        private float lastDash = -100f;
         private Vector2 dashDirection;
 
         // Climb state
         private bool isClimbing;
-        private bool isCrabing; // For crab animation state
+        private bool isGrabbing; // For grab animation state
         private bool isTouchingWall;
         private bool isWallSliding;
         private int wallDirection; // -1 for left, 1 for right
@@ -281,20 +283,35 @@ namespace VeilOfColours.Players
             }
 
             // Jump buffer
-            if (jumpAction != null && jumpAction.action.WasPressedThisFrame())
+            if (jumpAction != null && jumpAction.action != null)
             {
-                jumpBufferCounter = jumpBufferTime;
-            }
+                if (jumpAction.action.WasPressedThisFrame())
+                {
+                    Debug.Log(
+                        $"[Player {OwnerClientId}] JUMP PRESSED! Buffer set to {jumpBufferTime}"
+                    );
+                    jumpBufferCounter = jumpBufferTime;
+                }
 
-            if (jumpAction != null && jumpAction.action.WasReleasedThisFrame())
+                if (jumpAction.action.WasReleasedThisFrame())
+                {
+                    Debug.Log($"[Player {OwnerClientId}] Jump released");
+                    jumpReleased = true;
+                }
+            }
+            else
             {
-                jumpReleased = true;
+                Debug.LogWarning($"[Player {OwnerClientId}] jumpAction is null!");
             }
 
             // Dash input
-            if (dashAction != null && dashAction.action.WasPressedThisFrame() && canDash)
+            if (dashAction != null && dashAction.action.WasPressedThisFrame())
             {
-                StartDash();
+                Debug.Log($"[Player {OwnerClientId}] Dash pressed! canDash={canDash}");
+                if (canDash)
+                {
+                    StartDash();
+                }
             }
 
             // Climb input
@@ -505,7 +522,7 @@ namespace VeilOfColours.Players
             // Set animation states based on priority
             animator.SetBool("isDashing", isDashing);
             animator.SetBool("isClimbing", isClimbing);
-            animator.SetBool("isCrabing", isCrabing);
+            animator.SetBool("isGrabbing", isGrabbing);
 
             // Walking only when on ground and not climbing/dashing
             bool isWalking =
@@ -572,7 +589,6 @@ namespace VeilOfColours.Players
             dashDirection = inputDirection.normalized;
             isDashing = true;
             dashTimeLeft = dashDuration;
-            lastDash = Time.time;
             canDash = false;
             dashCooldownTimer = dashCooldown;
 
@@ -585,17 +601,22 @@ namespace VeilOfColours.Players
             // Cancel current velocity for clean dash
             rb.linearVelocity = Vector2.zero;
 
-            // Apply camera shake and gamepad vibration (only for local player)
-            if (IsOwner)
+            // Aktiviere Trail während Dash
+            if (dashTrail != null)
             {
-                // Trigger camera shake
-                if (cameraFollow != null)
+                dashTrail.emitting = true;
+                // Apply camera shake and gamepad vibration (only for local player)
+                if (IsOwner)
                 {
-                    cameraFollow.TriggerShake(dashShakeIntensity, dashShakeDuration);
-                }
+                    // Trigger camera shake
+                    if (cameraFollow != null)
+                    {
+                        cameraFollow.TriggerShake(dashShakeIntensity, dashShakeDuration);
+                    }
 
-                // Trigger gamepad vibration
-                TriggerGamepadVibration(dashVibrationIntensity, dashVibrationDuration);
+                    // Trigger gamepad vibration
+                    TriggerGamepadVibration(dashVibrationIntensity, dashVibrationDuration);
+                }
             }
         }
 
@@ -608,6 +629,12 @@ namespace VeilOfColours.Players
                 isDashing = false;
                 // Small velocity preservation at end of dash
                 rb.linearVelocity = dashDirection * dashSpeed * 0.3f;
+
+                // Deaktiviere Trail wenn Dash endet
+                if (dashTrail != null)
+                {
+                    dashTrail.emitting = false;
+                }
                 return;
             }
 
@@ -626,7 +653,7 @@ namespace VeilOfColours.Players
             }
             else
             {
-                isCrabing = false; // Not crabing if not climbing
+                isGrabbing = false; // Not grabbing if not climbing
             }
         }
 
@@ -649,7 +676,7 @@ namespace VeilOfColours.Players
             if (currentClimbStamina <= 0 || !isTouchingWall)
             {
                 isClimbing = false;
-                isCrabing = false;
+                isGrabbing = false;
                 rb.gravityScale = 3; // Restore gravity
                 currentClimbStamina = Mathf.Max(currentClimbStamina, 0);
                 return;
@@ -661,7 +688,7 @@ namespace VeilOfColours.Players
             if (!climbHeld)
             {
                 isClimbing = false;
-                isCrabing = false;
+                isGrabbing = false;
                 rb.gravityScale = 3; // Restore gravity
                 return;
             }
@@ -697,14 +724,14 @@ namespace VeilOfColours.Players
             {
                 rb.linearVelocity = new Vector2(0, verticalInput * climbSpeed);
                 rb.gravityScale = 0; // No gravity while climbing
-                isCrabing = false; // Not crabing when moving vertically
+                isGrabbing = false; // Not grabbing when moving vertically
             }
             else
             {
                 // Hang still on wall (completely frozen)
                 rb.linearVelocity = Vector2.zero;
                 rb.gravityScale = 0; // No gravity while hanging
-                isCrabing = true; // Crabing when hanging still on wall
+                isGrabbing = true; // Grabbing when hanging still on wall
             }
 
             // Reset air dash while climbing
