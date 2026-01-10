@@ -250,8 +250,34 @@ namespace VeilOfColours.Players
         {
             movementEnabled = false;
             rb.linearVelocity = Vector2.zero;
+
+            // Reset all animation states
+            ResetAllAnimations();
+
+            // Stop any ongoing dash
+            isDashing = false;
+            isClimbing = false;
+            isWallSliding = false;
+            isGrabbing = false;
+
+            // Deactivate dash trail
+            if (dashTrail != null)
+                dashTrail.emitting = false;
+
             yield return new WaitForSeconds(duration);
             movementEnabled = true;
+        }
+
+        private void ResetAllAnimations()
+        {
+            if (animator == null)
+                return;
+
+            animator.SetBool("isDashing", false);
+            animator.SetBool("isClimbing", false);
+            animator.SetBool("isGrabbing", false);
+            animator.SetBool("isWalking", false);
+            animator.SetBool("isJumping", false);
         }
 
         private void Update()
