@@ -176,7 +176,7 @@ namespace VeilOfColours.Players
 
         // Climb state
         private bool isClimbing;
-        private bool isCrabing; // For crab animation state
+        private bool isGrabbing; // For grab animation state
         private bool isTouchingWall;
         private bool isWallSliding;
         private int wallDirection; // -1 for left, 1 for right
@@ -522,7 +522,7 @@ namespace VeilOfColours.Players
             // Set animation states based on priority
             animator.SetBool("isDashing", isDashing);
             animator.SetBool("isClimbing", isClimbing);
-            animator.SetBool("isCrabing", isCrabing);
+            animator.SetBool("isGrabbing", isGrabbing);
 
             // Walking only when on ground and not climbing/dashing
             bool isWalking =
@@ -653,7 +653,7 @@ namespace VeilOfColours.Players
             }
             else
             {
-                isCrabing = false; // Not crabing if not climbing
+                isGrabbing = false; // Not grabbing if not climbing
             }
         }
 
@@ -676,7 +676,7 @@ namespace VeilOfColours.Players
             if (currentClimbStamina <= 0 || !isTouchingWall)
             {
                 isClimbing = false;
-                isCrabing = false;
+                isGrabbing = false;
                 rb.gravityScale = 3; // Restore gravity
                 currentClimbStamina = Mathf.Max(currentClimbStamina, 0);
                 return;
@@ -688,7 +688,7 @@ namespace VeilOfColours.Players
             if (!climbHeld)
             {
                 isClimbing = false;
-                isCrabing = false;
+                isGrabbing = false;
                 rb.gravityScale = 3; // Restore gravity
                 return;
             }
@@ -724,14 +724,14 @@ namespace VeilOfColours.Players
             {
                 rb.linearVelocity = new Vector2(0, verticalInput * climbSpeed);
                 rb.gravityScale = 0; // No gravity while climbing
-                isCrabing = false; // Not crabing when moving vertically
+                isGrabbing = false; // Not grabbing when moving vertically
             }
             else
             {
                 // Hang still on wall (completely frozen)
                 rb.linearVelocity = Vector2.zero;
                 rb.gravityScale = 0; // No gravity while hanging
-                isCrabing = true; // Crabing when hanging still on wall
+                isGrabbing = true; // Grabbing when hanging still on wall
             }
 
             // Reset air dash while climbing
