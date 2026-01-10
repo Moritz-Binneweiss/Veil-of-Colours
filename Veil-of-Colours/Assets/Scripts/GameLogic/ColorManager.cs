@@ -146,7 +146,6 @@ namespace VeilOfColours.GameLogic
                         if (tilemap != null)
                         {
                             tilemap.gameObject.SetActive(shouldBeVisible);
-                            tilemap.GetComponent<ShadowCaster2D>().enabled = shouldBeVisible;
                         }
                     }
                 }
