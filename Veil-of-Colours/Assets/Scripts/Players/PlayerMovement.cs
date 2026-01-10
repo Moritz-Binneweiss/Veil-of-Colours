@@ -403,16 +403,16 @@ namespace VeilOfColours.Players
             }
 
             // Check for wall jump FIRST (before any other state)
-            if (jumpBufferCounter > 0f && (isClimbing || isWallSliding) && isTouchingWall)
+            if (jumpBufferCounter > 0f && (isClimbing || isGrabbing || isWallSliding) && isTouchingWall)
             {
-                WallJump(isClimbing); // Pass whether we're climbing
+                WallJump(isClimbing || isGrabbing); // Pass whether we're climbing/grabbing
                 jumpBufferCounter = 0f;
             }
             else if (isDashing)
             {
                 HandleDash();
             }
-            else if (isClimbing)
+            else if (isClimbing || isGrabbing) // Handle both climbing and grabbing
             {
                 HandleClimb();
             }
@@ -459,6 +459,12 @@ namespace VeilOfColours.Players
             {
                 isJumping = false;
                 jumpReleased = true;
+                
+                // Explicitly reset jump animation when landing
+                if (animator != null)
+                {
+                    animator.SetBool("isJumping", false);
+                }
 
                 // Reset air dash when landing
                 if (dashResetOnGround)
@@ -556,17 +562,25 @@ namespace VeilOfColours.Players
             animator.SetBool("isDashing", isDashing);
             animator.SetBool("isClimbing", isClimbing);
             animator.SetBool("isGrabbing", isGrabbing);
+            
+            // Debug logging (remove later)
+            if (isGrabbing || isClimbing)
+            {
+                Debug.Log($"Grab: {isGrabbing}, Climb: {isClimbing}");
+            }
 
-            // Walking only when on ground and not climbing/dashing
+            // Walking only when on ground and not climbing/dashing/grabbing
             bool isWalking =
                 isGrounded
                 && !isClimbing
+                && !isGrabbing
                 && !isDashing
                 && Mathf.Abs(rb.linearVelocity.x) > WalkingThreshold;
             animator.SetBool("isWalking", isWalking);
 
-            // Jump animation: true when in air and not climbing/dashing
-            bool shouldShowJump = !isGrounded && !isClimbing && !isDashing;
+            // Jump animation: set when jumping (not just any time in air)
+            // isJumping is set to true in Jump() and false when landing
+            bool shouldShowJump = isJumping && !isClimbing && !isGrabbing && !isDashing;
             animator.SetBool("isJumping", shouldShowJump);
 
             // Optional: send Y velocity for rise/fall animations
@@ -596,6 +610,12 @@ namespace VeilOfColours.Players
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isJumping = true;
             jumpReleased = false;
+            
+            // Set jump animation immediately when jumping
+            if (animator != null)
+            {
+                animator.SetBool("isJumping", true);
+            }
         }
 
         private void StartDash()
@@ -686,13 +706,14 @@ namespace VeilOfColours.Players
             // Can only climb if touching wall and has stamina
             if (isTouchingWall && !isGrounded && currentClimbStamina > 0)
             {
-                isClimbing = true;
+                isGrabbing = true; // Start by grabbing the wall
                 isDashing = false; // Cancel dash if climbing
                 canRegenClimbStamina = false; // Stop regen while climbing
             }
             else
             {
                 isGrabbing = false; // Not grabbing if not climbing
+                isClimbing = false;
             }
         }
 
@@ -764,6 +785,7 @@ namespace VeilOfColours.Players
                 rb.linearVelocity = new Vector2(0, verticalInput * climbSpeed);
                 rb.gravityScale = 0; // No gravity while climbing
                 isGrabbing = false; // Not grabbing when moving vertically
+                isClimbing = true; // Actively climbing
             }
             else
             {
@@ -771,6 +793,7 @@ namespace VeilOfColours.Players
                 rb.linearVelocity = Vector2.zero;
                 rb.gravityScale = 0; // No gravity while hanging
                 isGrabbing = true; // Grabbing when hanging still on wall
+                isClimbing = false; // Not actively climbing, just grabbing
             }
 
             // Reset air dash while climbing
