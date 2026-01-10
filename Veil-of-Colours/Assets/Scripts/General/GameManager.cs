@@ -53,13 +53,16 @@ namespace VeilOfColours.General
         private void Start()
         {
             SubscribeToNetworkEvents();
+
+            // Enable pause action (any player can pause)
+            if (pauseAction != null)
+                pauseAction.action.Enable();
         }
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
             isPaused.OnValueChanged += OnPauseStateChanged;
-            UpdateUIState(isPaused.Value);
         }
 
         public override void OnNetworkDespawn()

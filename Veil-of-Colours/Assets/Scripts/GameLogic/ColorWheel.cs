@@ -50,22 +50,26 @@ namespace VeilOfColours.GameLogic
         private int lastPreviewedColorIndex = -1;
         private Vector2 currentStickInput;
 
-        private void OnEnable()
+        public override void OnNetworkSpawn()
         {
-            if (!IsOwner)
-                return;
+            base.OnNetworkSpawn();
 
-            if (colorWheelAction != null)
-                colorWheelAction.action.Enable();
+            if (IsOwner)
+            {
+                if (colorWheelAction != null)
+                    colorWheelAction.action.Enable();
+            }
         }
 
-        private void OnDisable()
+        public override void OnNetworkDespawn()
         {
-            if (!IsOwner)
-                return;
+            base.OnNetworkDespawn();
 
-            if (colorWheelAction != null)
-                colorWheelAction.action.Disable();
+            if (IsOwner)
+            {
+                if (colorWheelAction != null)
+                    colorWheelAction.action.Disable();
+            }
         }
 
         private void Start()
