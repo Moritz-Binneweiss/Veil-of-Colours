@@ -77,6 +77,7 @@ namespace VeilOfColours.GameLogic
         private void OnColorChanged(int previousValue, int newValue)
         {
             ApplyColorLayer(newValue);
+            LampManager.Instance.ApplyColorToAllLamps();
         }
 
         public void RequestColorChange(int colorIndex)
@@ -95,6 +96,37 @@ namespace VeilOfColours.GameLogic
         private void RequestColorChangeServerRpc(int colorIndex)
         {
             activeColorIndex.Value = colorIndex;
+        }
+
+        public void RequestColorPreview(int colorIndex)
+        {
+            if (!IsServer && !IsHost)
+            {
+                RequestColorPreviewServerRpc(colorIndex);
+            }
+            else
+            {
+                ApplyColorPreviewClientRpc(colorIndex);
+            }
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void RequestColorPreviewServerRpc(int colorIndex)
+        {
+            ApplyColorPreviewClientRpc(colorIndex);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        private void ApplyColorPreviewClientRpc(int colorIndex)
+        {
+            // Apply visual preview without changing the actual active color
+            ApplyColorLayer(colorIndex);
+
+            // Also update lamp colors for preview with specific color index
+            if (LampManager.Instance != null)
+            {
+                LampManager.Instance.ApplyColorToAllLamps(colorIndex);
+            }
         }
 
         private void ApplyColorLayer(int colorIndex)
