@@ -1,5 +1,6 @@
 using Unity.Netcode;
 using UnityEngine;
+using UnityEngine.Rendering.Universal;
 using UnityEngine.Tilemaps;
 
 namespace VeilOfColours.GameLogic
@@ -145,6 +146,7 @@ namespace VeilOfColours.GameLogic
                         if (tilemap != null)
                         {
                             tilemap.gameObject.SetActive(shouldBeVisible);
+                            tilemap.GetComponent<ShadowCaster2D>().enabled = shouldBeVisible;
                         }
                     }
                 }
