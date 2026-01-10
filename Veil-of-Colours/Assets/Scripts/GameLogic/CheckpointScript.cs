@@ -19,7 +19,6 @@ public class CheckpointScript : MonoBehaviour
         activated = true;
         CheckpointManager.Instance?.ActivateCheckpoint(gameObject);
         SetSpriteActive(true);
-        Debug.Log($"Checkpoint '{name}' activated");
     }
 
     public void SetSpriteActive(bool isActive)

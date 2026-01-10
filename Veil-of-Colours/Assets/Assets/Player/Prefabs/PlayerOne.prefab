@@ -658,6 +658,7 @@ MonoBehaviour:
   deadzoneHeight: 6
   recenterSpeed: 0.125
   idleThreshold: 0.1
+  enableShake: 1
 --- !u!20 &2769143714376100532
 Camera:
   m_ObjectHideFlags: 0
@@ -916,7 +917,7 @@ GameObject:
   - component: {fileID: 6479326836676515275}
   m_Layer: 0
   m_Name: PlayerOne
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -987,6 +988,7 @@ MonoBehaviour:
   activationThreshold: 0.3
   selectionDeadzone: 0.2
   selectorRadius: 130
+  slowMotionScale: 0.3
   availableColors:
   - {r: 0, g: 0, b: 1, a: 1}
   - {r: 1, g: 0, b: 0, a: 1}
@@ -1022,7 +1024,10 @@ MonoBehaviour:
   dashDuration: 0.25
   dashCooldown: 0.5
   dashResetOnGround: 1
-  dashTrail: {fileID: 0}
+  dashShakeIntensity: 0.15
+  dashShakeDuration: 0.15
+  dashVibrationIntensity: 0.3
+  dashVibrationDuration: 0.15
   climbSpeed: 5
   maxClimbStamina: 100
   climbStaminaDrainRate: 40
@@ -1044,6 +1049,8 @@ MonoBehaviour:
   wallCheckFront: {fileID: 142691690444496801}
   wallCheckDistance: 0.5
   flipSpeed: 40
+  cameraFollow: {fileID: 2473705448982396736}
+  distanceBetweenImages: 0.1
 --- !u!114 &3044659649591904390
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -1,4 +1,6 @@
+using Unity.Netcode;
 using UnityEngine;
+using VeilOfColours.Players;
 
 public class SpikeDamage : MonoBehaviour
 {
@@ -35,6 +37,17 @@ public class SpikeDamage : MonoBehaviour
             return;
         }
 
-        CheckpointManager.Instance.TeleportToLastCheckpoint(other.gameObject);
+        // Check if this is the local player
+        var playerMovement = other.GetComponent<PlayerMovement>();
+        if (playerMovement != null && playerMovement.IsOwner)
+        {
+            CheckpointManager.Instance.TeleportToLastCheckpoint(other.gameObject);
+            playerMovement.FreezeMovementForDuration(1f);
+        }
+        else if (playerMovement == null)
+        {
+            // Fallback for players without PlayerMovement component
+            CheckpointManager.Instance.TeleportToLastCheckpoint(other.gameObject);
+        }
     }
 }
