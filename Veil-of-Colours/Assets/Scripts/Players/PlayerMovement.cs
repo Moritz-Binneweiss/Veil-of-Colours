@@ -159,6 +159,9 @@ namespace VeilOfColours.Players
         private bool wasGrounded;
         private Vector2 moveInput;
 
+        // Store initial scale to preserve Y and Z values
+        private Vector3 initialScale;
+
         private float coyoteTimeCounter;
 
         private float jumpBufferCounter;
@@ -192,6 +195,9 @@ namespace VeilOfColours.Players
             rb.interpolation = RigidbodyInterpolation2D.Interpolate;
             rb.gravityScale = 3;
             currentClimbStamina = maxClimbStamina;
+
+            // Store initial scale to preserve Y and Z
+            initialScale = transform.localScale;
 
             // Find camera if not assigned
             if (cameraFollow == null)
@@ -330,7 +336,6 @@ namespace VeilOfColours.Players
             // Dash input
             if (dashAction != null && dashAction.action.WasPressedThisFrame())
             {
-                Debug.Log($"[Player {OwnerClientId}] Dash pressed! canDash={canDash}");
                 if (canDash)
                 {
                     StartDash();
@@ -573,17 +578,17 @@ namespace VeilOfColours.Players
 
             if (moveInput.x > 0.01f)
             {
-                targetScaleX = 1; // Face right
+                targetScaleX = Mathf.Abs(initialScale.x); // Face right, preserve magnitude
             }
             else if (moveInput.x < -0.01f)
             {
-                targetScaleX = -1; // Face left
+                targetScaleX = -Mathf.Abs(initialScale.x); // Face left, preserve magnitude
             }
 
             // Lerp to target scale for smooth flip
             float currentScaleX = transform.localScale.x;
             float newScaleX = Mathf.Lerp(currentScaleX, targetScaleX, flipSpeed * Time.deltaTime);
-            transform.localScale = new Vector3(newScaleX, 1, 1);
+            transform.localScale = new Vector3(newScaleX, initialScale.y, initialScale.z);
         }
 
         private void Jump()
