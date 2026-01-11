@@ -60,24 +60,7 @@ namespace VeilOfColours.Players
                 transform.position = targetPos;
             }
 
-            // Disable all other cameras before setting this as main
-            Camera[] allCameras = FindObjectsByType<Camera>(FindObjectsSortMode.None);
-            Camera thisCam = GetComponent<Camera>();
-
-            if (thisCam != null)
-            {
-                foreach (Camera cam in allCameras)
-                {
-                    if (cam != thisCam)
-                    {
-                        cam.enabled = false;
-                    }
-                }
-
-                // Enable and set this camera as the main camera
-                thisCam.enabled = true;
-                thisCam.tag = "MainCamera";
-            }
+           
         }
 
         private void LateUpdate()
