@@ -31,8 +31,16 @@ namespace VeilOfColours.Players
         [SerializeField]
         private float idleThreshold = 0.1f; // Velocity threshold to consider player as idle
 
+        [Header("Camera Shake")]
+        [SerializeField]
+        private bool enableShake = true;
+
         private Vector3 velocity = Vector3.zero;
         private Rigidbody2D targetRigidbody;
+        private float shakeIntensity = 0f;
+        private float shakeTimeRemaining = 0f;
+        private float shakeDuration = 0f;
+        private Vector3 shakeOffset = Vector3.zero;
 
         private void Start()
         {
@@ -51,6 +59,8 @@ namespace VeilOfColours.Players
                 targetPos.z = offset.z;
                 transform.position = targetPos;
             }
+
+           
         }
 
         private void LateUpdate()
@@ -111,13 +121,19 @@ namespace VeilOfColours.Players
                 ? smoothTime
                 : (smoothTime * (1f / recenterSpeed));
 
-            // Smooth follow
-            transform.position = Vector3.SmoothDamp(
+            // Smooth follow WITHOUT shake (shake applied after)
+            Vector3 smoothPosition = Vector3.SmoothDamp(
                 transform.position,
                 desiredPosition,
                 ref velocity,
                 currentSmoothTime
             );
+
+            // Update camera shake
+            UpdateShake();
+
+            // Apply shake AFTER smoothing for instant effect
+            transform.position = smoothPosition + shakeOffset;
         }
 
         public void SetTarget(Transform newTarget)
@@ -130,6 +146,42 @@ namespace VeilOfColours.Players
                 Vector3 targetPos = target.position;
                 targetPos.z = offset.z;
                 transform.position = targetPos;
+            }
+        }
+
+        public void TriggerShake(float intensity, float duration)
+        {
+            if (!enableShake)
+                return;
+
+            shakeIntensity = intensity;
+            shakeTimeRemaining = duration;
+            shakeDuration = duration;
+        }
+
+        private void UpdateShake()
+        {
+            if (shakeTimeRemaining > 0f)
+            {
+                shakeTimeRemaining -= Time.deltaTime;
+
+                // Generate random shake offset
+                shakeOffset = new Vector3(
+                    Random.Range(-1f, 1f) * shakeIntensity,
+                    Random.Range(-1f, 1f) * shakeIntensity,
+                    0f
+                );
+
+                // Reduce intensity over time for smooth fade out
+                if (shakeDuration > 0f)
+                {
+                    float fadeOut = shakeTimeRemaining / shakeDuration;
+                    shakeOffset *= fadeOut;
+                }
+            }
+            else
+            {
+                shakeOffset = Vector3.zero;
             }
         }
 

@@ -50,28 +50,19 @@ namespace VeilOfColours.General
             Instance = this;
         }
 
-        private void OnEnable()
-        {
-            if (pauseAction != null)
-                pauseAction.action.Enable();
-        }
-
-        private void OnDisable()
-        {
-            if (pauseAction != null)
-                pauseAction.action.Disable();
-        }
-
         private void Start()
         {
             SubscribeToNetworkEvents();
+
+            // Enable pause action (any player can pause)
+            if (pauseAction != null)
+                pauseAction.action.Enable();
         }
 
         public override void OnNetworkSpawn()
         {
             base.OnNetworkSpawn();
             isPaused.OnValueChanged += OnPauseStateChanged;
-            UpdateUIState(isPaused.Value);
         }
 
         public override void OnNetworkDespawn()
@@ -85,8 +76,12 @@ namespace VeilOfColours.General
 
         private void Update()
         {
-            // Check for pause input from any owner
-            if (IsClient && pauseAction != null && pauseAction.action.WasPressedThisFrame())
+            // Prevent pausing during player connection
+            if (NetworkManager.Singleton == null || !NetworkManager.Singleton.IsListening)
+                return;
+
+            // Check for pause input - any player can pause
+            if (pauseAction != null && pauseAction.action.WasPressedThisFrame())
             {
                 if (isPaused.Value)
                 {
@@ -192,13 +187,28 @@ namespace VeilOfColours.General
 
         private void UpdateUIState(bool paused)
         {
+            // Use unscaled time to prevent blocking network updates
             Time.timeScale = paused ? 0f : 1f;
 
             if (gameUICanvas != null)
                 gameUICanvas.SetActive(!paused);
 
-            if (pauseUICanvas != null)
-                pauseUICanvas.SetActive(paused);
+            if (pauseUICanvas != null){
+                    pauseUICanvas.SetActive(paused);
+                    SetAllChildrenActive(pauseUICanvas, paused);   
+                }
+              
+        }
+
+        private void SetAllChildrenActive(GameObject parent, bool active)
+        {
+            if (parent == null)
+                return;
+
+            foreach (Transform child in parent.transform)
+            {
+                child.gameObject.SetActive(active);
+            }
         }
 
         // ==================== GAME OVER ====================

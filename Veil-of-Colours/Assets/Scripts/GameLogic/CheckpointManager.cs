@@ -37,7 +37,6 @@ public class CheckpointManager : MonoBehaviour
             return;
         RegisterCheckpoint(cp);
         lastActiveIndex = activeCheckpoints.IndexOf(cp);
-        Debug.Log($"Checkpoint aktiviert: {cp.name} (Index {lastActiveIndex})");
     }
 
     public GameObject GetLastCheckpoint()
@@ -52,7 +51,7 @@ public class CheckpointManager : MonoBehaviour
         TeleportToLastCheckpoint(playerToTeleport);
     }
 
-    // Lokale Teleport-Methode: telepor­tiert genau das übergebene Player-GameObject
+    // Local teleport method: teleports the given player GameObject
     public void TeleportToLastCheckpoint(GameObject playerToTeleport)
     {
         var last = GetLastCheckpoint();
@@ -78,8 +77,7 @@ public class CheckpointManager : MonoBehaviour
             rb2d.angularVelocity = 0f;
             Physics2D.SyncTransforms();
         }
-
-        Debug.Log($"Player '{playerToTeleport.name}' teleported to last checkpoint.");
     }
+
     public GameObject[] GetActiveCheckpointsArray() => activeCheckpoints.ToArray();
 }

@@ -32,6 +32,9 @@ namespace VeilOfColours.GameLogic
         [SerializeField]
         private float selectorRadius = 130f;
 
+        [SerializeField]
+        private float slowMotionScale = 0.3f;
+
         [Header("Color Assignments")]
         [SerializeField]
         private Color[] availableColors = new Color[]
@@ -44,24 +47,29 @@ namespace VeilOfColours.GameLogic
 
         private bool isWheelActive;
         private int currentColorIndex = -1;
+        private int lastPreviewedColorIndex = -1;
         private Vector2 currentStickInput;
 
-        private void OnEnable()
+        public override void OnNetworkSpawn()
         {
-            if (!IsOwner)
-                return;
+            base.OnNetworkSpawn();
 
-            if (colorWheelAction != null)
-                colorWheelAction.action.Enable();
+            if (IsOwner)
+            {
+                if (colorWheelAction != null)
+                    colorWheelAction.action.Enable();
+            }
         }
 
-        private void OnDisable()
+        public override void OnNetworkDespawn()
         {
-            if (!IsOwner)
-                return;
+            base.OnNetworkDespawn();
 
-            if (colorWheelAction != null)
-                colorWheelAction.action.Disable();
+            if (IsOwner)
+            {
+                if (colorWheelAction != null)
+                    colorWheelAction.action.Disable();
+            }
         }
 
         private void Start()
@@ -82,6 +90,19 @@ namespace VeilOfColours.GameLogic
         {
             if (colorWheelAction == null)
                 return;
+
+            // Disable color wheel when game is paused
+            if (Time.timeScale == 0f)
+            {
+                // Close wheel if it's open when pause happens
+                if (isWheelActive)
+                {
+                    isWheelActive = false;
+                    if (colorWheelUI != null)
+                        colorWheelUI.SetActive(false);
+                }
+                return;
+            }
 
             Vector2 inputVector = colorWheelAction.action.ReadValue<Vector2>();
             float magnitude = inputVector.magnitude;
@@ -106,6 +127,12 @@ namespace VeilOfColours.GameLogic
             isWheelActive = true;
             if (colorWheelUI != null)
                 colorWheelUI.SetActive(true);
+
+            // Reset preview tracking
+            lastPreviewedColorIndex = -1;
+
+            // Activate slow motion for all players
+            SetTimeScaleServerRpc(slowMotionScale);
         }
 
         private void CloseColorWheel()
@@ -114,12 +141,17 @@ namespace VeilOfColours.GameLogic
             if (colorWheelUI != null)
                 colorWheelUI.SetActive(false);
 
+            // Restore normal time for all players
+            SetTimeScaleServerRpc(1f);
+
+            // Apply final color selection if one was made
             if (currentColorIndex >= 0)
             {
                 ApplyColorSelection(currentColorIndex);
             }
 
             currentColorIndex = -1;
+            lastPreviewedColorIndex = -1;
         }
 
         private void UpdateColorSelection(Vector2 stickInput)
@@ -143,6 +175,13 @@ namespace VeilOfColours.GameLogic
             if (colorIndex != currentColorIndex)
             {
                 currentColorIndex = colorIndex;
+
+                // Show preview of this color for both players
+                if (colorIndex != lastPreviewedColorIndex)
+                {
+                    PreviewColorSelection(colorIndex);
+                    lastPreviewedColorIndex = colorIndex;
+                }
             }
 
             UpdateSelectorVisual(stickInput);
@@ -167,6 +206,20 @@ namespace VeilOfColours.GameLogic
                 {
                     selectorImage.color = availableColors[currentColorIndex];
                 }
+            }
+        }
+
+        private void PreviewColorSelection(int colorIndex)
+        {
+            if (colorIndex < 0 || colorIndex >= availableColors.Length)
+                return;
+
+            if (ColorManager.Instance == null)
+                return;
+
+            if (ColorManager.Instance.IsSpawned)
+            {
+                ColorManager.Instance.RequestColorPreview(colorIndex);
             }
         }
 
@@ -206,6 +259,18 @@ namespace VeilOfColours.GameLogic
                 return ColorManager.Instance.GetActiveColorIndex();
             }
             return 0;
+        }
+
+        [Rpc(SendTo.Server, InvokePermission = RpcInvokePermission.Everyone)]
+        private void SetTimeScaleServerRpc(float scale)
+        {
+            SetTimeScaleClientRpc(scale);
+        }
+
+        [Rpc(SendTo.Everyone)]
+        private void SetTimeScaleClientRpc(float scale)
+        {
+            Time.timeScale = scale;
         }
     }
 }

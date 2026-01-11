@@ -43,6 +43,12 @@ namespace VeilOfColours.UI
 
             if (victoryUICanvas != null)
                 victoryUICanvas.SetActive(false);
+
+            // If already connected when this script starts, show GameUI immediately
+            if (NetworkManager.Singleton != null && NetworkManager.Singleton.IsListening)
+            {
+                ShowGameUI();
+            }
         }
 
         private void SubscribeToNetworkEvents()
