@@ -67,9 +67,6 @@ namespace VeilOfColours.Players
         [SerializeField]
         private bool dashResetOnGround = true;
 
-        [SerializeField]
-        private TrailRenderer dashTrail;
-
         [Header("Dash Feedback")]
         [SerializeField]
         private float dashShakeIntensity = 0.15f;
@@ -82,6 +79,9 @@ namespace VeilOfColours.Players
 
         [SerializeField]
         private float dashVibrationDuration = 0.15f;
+
+        [SerializeField]
+        private ParticleSystem dashEffect; // Reference to DashEffect Particle System
 
         [Header("Climb Settings")]
         [SerializeField]
@@ -204,6 +204,8 @@ namespace VeilOfColours.Players
             {
                 cameraFollow = FindFirstObjectByType<CameraFollow>();
             }
+
+           
         }
 
         public override void OnNetworkSpawn()
@@ -265,10 +267,6 @@ namespace VeilOfColours.Players
             isClimbing = false;
             isWallSliding = false;
             isGrabbing = false;
-
-            // Deactivate dash trail
-            if (dashTrail != null)
-                dashTrail.emitting = false;
 
             yield return new WaitForSeconds(duration);
             movementEnabled = true;
@@ -403,7 +401,11 @@ namespace VeilOfColours.Players
             }
 
             // Check for wall jump FIRST (before any other state)
-            if (jumpBufferCounter > 0f && (isClimbing || isGrabbing || isWallSliding) && isTouchingWall)
+            if (
+                jumpBufferCounter > 0f
+                && (isClimbing || isGrabbing || isWallSliding)
+                && isTouchingWall
+            )
             {
                 WallJump(isClimbing || isGrabbing); // Pass whether we're climbing/grabbing
                 jumpBufferCounter = 0f;
@@ -459,7 +461,7 @@ namespace VeilOfColours.Players
             {
                 isJumping = false;
                 jumpReleased = true;
-                
+
                 // Explicitly reset jump animation when landing
                 if (animator != null)
                 {
@@ -562,7 +564,7 @@ namespace VeilOfColours.Players
             animator.SetBool("isDashing", isDashing);
             animator.SetBool("isClimbing", isClimbing);
             animator.SetBool("isGrabbing", isGrabbing);
-            
+
             // Debug logging (remove later)
             if (isGrabbing || isClimbing)
             {
@@ -610,7 +612,7 @@ namespace VeilOfColours.Players
             rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
             isJumping = true;
             jumpReleased = false;
-            
+
             // Set jump animation immediately when jumping
             if (animator != null)
             {
@@ -645,6 +647,18 @@ namespace VeilOfColours.Players
             canDash = false;
             dashCooldownTimer = dashCooldown;
 
+            // Set dash animation immediately
+            if (animator != null)
+            {
+                animator.SetBool("isDashing", true);
+            }
+            
+            // Start dash effect
+            if (dashEffect != null)
+            {
+                dashEffect.Play();
+            }
+
             // Use up air dash if in air
             if (!isGrounded)
             {
@@ -653,12 +667,6 @@ namespace VeilOfColours.Players
 
             // Cancel current velocity for clean dash
             rb.linearVelocity = Vector2.zero;
-
-            // Aktiviere Trail während Dash
-            if (dashTrail != null)
-            {
-                dashTrail.emitting = true;
-            }
 
             // Apply camera shake and gamepad vibration (only for local player)
             if (IsOwner)
@@ -686,14 +694,22 @@ namespace VeilOfColours.Players
             if (dashTimeLeft <= 0)
             {
                 isDashing = false;
+
+                // Reset dash animation
+                if (animator != null)
+                {
+                    animator.SetBool("isDashing", false);
+                }
+                
+                // Stop dash effect
+                if (dashEffect != null)
+                {
+                    dashEffect.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+                }
+
                 // Small velocity preservation at end of dash
                 rb.linearVelocity = dashDirection * dashSpeed * 0.3f;
 
-                // Deaktiviere Trail wenn Dash endet
-                if (dashTrail != null)
-                {
-                    dashTrail.emitting = false;
-                }
                 return;
             }
 
@@ -914,6 +930,23 @@ namespace VeilOfColours.Players
             {
                 Gamepad.current.SetMotorSpeeds(intensity, intensity);
                 StartCoroutine(StopVibrationAfterDelay(duration));
+            }
+        }
+
+        // Animation Event Methods for Dash Effect
+        public void EffectOn()
+        {
+            if (dashEffect != null)
+            {
+                dashEffect.Play();
+            }
+        }
+
+        public void EffectOff()
+        {
+            if (dashEffect != null)
+            {
+                dashEffect.Stop();
             }
         }
 
