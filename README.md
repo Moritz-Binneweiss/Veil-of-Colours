@@ -49,6 +49,9 @@ Schließlich ist es ein recht bekanntes Problem und durch einen TileMapAtlas kan
 
 - **Camera Follow und Movement System**: Die Entwicklung des Camera-Follow und Movement-Systems ist stark inspiriert von Celeste und dem sehr interessantem und empfehlenswerten Video (https://www.youtube.com/watch?v=yorTG9at90g von Game Maker's Toolkit)
 
+- **Animationen**: Bei den Animation war ein learning, dass man falls möglich die 2D Animationen über Sprite Sheets machen soll, da dass viel besser und schneller umzusetzen ist.
+Das rigging mit Bones funktioniert zwar auch gut aber ist wesentlich besser für 3D geeignet
+
 ## Besondere Leistungen
 
 - **Vollständig selbst erstellte Assets**: Alle visuellen Assets, Sprites und Animationen wurden eigenständig in Aseprite und im Animator erstellt.
