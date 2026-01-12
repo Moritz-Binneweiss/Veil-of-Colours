@@ -8,60 +8,78 @@
 
 Unity Version: 6000.2.6f2
 
-### **Figma Board**
+### Figma Board
+https://www.figma.com/board/kBoRnHPDNGJm4fzHZrUeEu/Veil-of-Colours?node-id=0-1&t=oa8m78GmibciiSQd-1![FigmaBoard](image.png)
 
-- https://www.figma.com/board/kBoRnHPDNGJm4fzHZrUeEu/Veil-of-Colours?node-id=0-1&t=oa8m78GmibciiSQd-1
+### GitHub Repo
+https://github.com/Moritz-Binneweiss/Veil-of-Colours
 
-## Verwendete Assets
+### Link zum Video
+- 
 
-- Asset 2: `Name + (Optional) Publisher + <Link>`
-- Asset 3: `Name + (Optional) Publisher + <Link>`
-
-## Steuerung
-
-|           Taste           |             Funktion             |
-| :-----------------------: | :------------------------------: |
-|           **W**           |         Vorwärts bewegen         |
-|           **S**           |        Rückwärts bewegen         |
-|           **A**           |        Nach links bewegen        |
-|           **D**           |       Nach rechts bewegen        |
-|         **Maus**          | Umschauen / Blickrichtung ändern |
-| **LMB (Linke Maustaste)** |             Schießen             |
-|           **R**           |            Nachladen             |
+## Start-Up Guide
+1. Projekt auf GitHub (z.B. als Zip) herunterladen
+2. Zip Entpacken
+3. Projekt in Unity (Version: 6000.2.6f2) starten/öffnen
+4. Falls gewünscht mit eigenem Relay Service verbinden (Edit > Project Settings > Services > evtl. Unlink Project > selbst mit Unity Account verknüpfen)
+5. MainMenu Scene öffnen > Spiel starten > "Host Game" > und dann losspielen
+6. Falls 2. Player gewünscht muss dieser einfach den Code wenn man Pause drückt in das textfeld im MainMenu eingeben > Join Game > und schon sind beide verbunden
 
 ## Beschreibung des Projektes
 
-Dieses Prototyping-Projekt dient als Grundlage zur Evaluierung der ECS-Architektur (Entity Component System) in Unity und implementiert ein rudimentäres Kampfsystem mit Raycasting für Treffererkennung. Das Hauptziel ist die Optimierung der Performance bei einer hohen Anzahl von interagierenden Spielobjekten durch die Nutzung des Unity DOTS (Data-Oriented Technology Stack) Ansatzes. Die Asset-Pipeline ist so konfiguriert, dass sie Asynchrone Ladevorgänge unterstützt, um Ladezeiten zu minimieren und ein flüssiges Spielerlebnis zu gewährleisten.
+Veil of Colours ist ein kooperativer 2D-Platformer für zwei Spieler, der über Unity's Relay Service vernetzt ist. Das Spiel kombiniert die klassischen Jump-and-Run-Mechaniken mit der Farbwechsel-Mechanic von dem Indie Spiel "Hue". 
+Spieler können zwischen verschiedenen Farblayern wechseln, wodurch bestimmte Objekte und Hindernisse sichtbar oder unsichtbar werden. Jeder Spieler durchläuft ein eigenes Level, das speziell auf die Farbmechanik zugeschnitten ist. Das Projekt nutzt Tilemaps für die Levelgestaltung, selbst erstellte 2D-Animationen im Unity Animator und zusätzliche 2D-Assets erstellt in Aseprite.
 
 ## Verwendete Technologien
 
-- Für die hoch performante Simulation des Gameplays wird primär der Data-Oriented Technology Stack (DOTS) genutzt.
-- Speziell kommen hier die Module Entitys, Jobs und der Burst Compiler zum Einsatz, um die Parallelisierung und Effizienz der Komponentenverarbeitung zu maximieren.
-- [...]
+- **Unity 6000.2.6f2** als Game Engine mit Universal Render Pipeline (URP)
+- **Unity Netcode for GameObjects** in Kombination mit Unity's **Relay Service** für die Multiplayer-Synchronisation
+- **Unity Tilemap System** für das Level-Design mit Rules und automatischer Tile-Platzierung
+- **Unity's neues Input System** für flexible Controller- und Keyboard-Unterstützung
+- **Aseprite** für die Erstellung von Sprites und 2D-Assets
+- **Unity Animator** für Character-Animationen und State Changes
 
 ## Besondere Herausforderungen / Lessions Learned
 
-## (Optional) Besondere Leistung
+- **Tilemap Flickering Problem**: Bei der Implementierung der Tilempaps und der Farblayers trat ein Flickering/Tethering-Problem auf. 
+Wir haben das Problem analysiert und sehr viele verschiedene Fixes versucht.
+Schließlich ist es ein recht bekanntes Problem und durch einen TileMapAtlas kann man das Problem auf jeden Fall beheben und verbessern.
 
----
+- **Networking-Synchronisation**: Die Synchronisation von zwei Spielern über Unity's Relay Service funktioniert einwandfrei. Zunächst hatten wir Probleme, da wir es über ein lokales gemeinsames Netzwerk versucht hatten, was aber Probleme mit den Firewalls und Ports dartstellte
 
-## **Features**
+- **Camera Follow und Movement System**: Die Entwicklung des Camera-Follow und Movement-Systems ist stark inspiriert von Celeste und dem sehr interessantem und empfehlenswerten Video (https://www.youtube.com/watch?v=yorTG9at90g von Game Maker's Toolkit)
 
-- 2D Platformer
-- 2 Player Networking
-- 1 Puzzle Level pro Person
-- Layer Obstacles/Objects
-- Farbwechsel Mechanic
-- Jump and Run Movement
+## Besondere Leistungen
 
-## **Technische Details**
+- **Vollständig selbst erstellte Assets**: Alle visuellen Assets, Sprites und Animationen wurden eigenständig in Aseprite und im Animator erstellt.
 
-- Aseprite
-- Tilesets/Tilemaps
-- 2D-Animationen
-- Networking
+- **Funktionales Multiplayer-System**: Erfolgreiche Implementation eines stabilen 2-Spieler-Networking-Systems mit Unity's Relay Service.
 
-## **Protokolle**
+- **Komplexe Puzzle-Level**: Entwicklung von zwei individuellen Puzzle-Leveln, die die Farbwechsel-Mechanic kreativ nutzen und kooperatives Gameplay fördern.
+
+- **Poliertes Gameplay**: Integration von erweiterten Bewegungsmechaniken (Dash, Klettern, Festhalten), einem Checkpoint-System, Door- und Pressure Plate System, Key-System und einem funktionalen UI mit Pause-Menü und Farbrad-Interface.
+
+## Verwendete Assets
+
+- Alle Assets sind selbst erstellt und selbst desingt (Aseprite, Unity Animator)
+- Standard Unity 2D Packages + Relay Service von Unity Registry
+- Scene Switcher Pro von Ajay Uthaman (https://assetstore.unity.com/packages/tools/gui/scene-switcher-pro-313355) für schnelleres Scene Switching
+
+## Steuerung
+
+|           Taste / Button (Gamepad)           |             Funktion             |
+| :-----------------------: | :------------------------------: |
+|           **W / Left Stick (Up)**           |         Vorwärts bewegen         |
+|           **S / Left Stick (Down)**           |        Rückwärts bewegen         |
+|           **A / Left Stick (Left)**           |        Nach links bewegen        |
+|           **D / Left Stick (Right)**           |       Nach rechts bewegen        |
+|           **Space / Button South**           |            Springen             |
+| **Shift / Button West** |             Dash             |
+|           **Left Control / Left Trigger**           |            Klettern             |
+|           **Pfeiltasten / Right Stick**           |            Farbrad             |
+|           **Escape / Start Button**           |            Pause             |
+
+## Protokolle
 
 #### **03.11.2025**
 
@@ -153,9 +171,11 @@ Präsentation:
 
 #### **12.01.2026**
 
-Besprechung:
+Abschluss:
 
 - Präsentation gehalten
 - Basic UI
 - Neue Designs für alles
 - Checkpoint und Door System
+- Animationen
+- alles erweitert und verbessert
